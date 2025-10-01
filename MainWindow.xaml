@@ -205,11 +205,11 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             
-                            <controls:RichTextEditor Grid.Column="0"/>
+                            <controls:RichTextEditor x:Name="SplitModeEditor" Grid.Column="0"/>
                             
                             <Border Grid.Column="1" Background="{ThemeResource DividerStrokeColorDefaultBrush}"/>
                             
-                            <controls:MarkdownPreview Grid.Column="2"/>
+                            <controls:MarkdownPreview x:Name="SplitModePreview" Grid.Column="2"/>
                         </Grid>
                     </Grid>
 

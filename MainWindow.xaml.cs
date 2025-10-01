@@ -15,6 +15,7 @@ using Windows.Foundation.Collections;
 using Jot.ViewModels;
 using System.Text.RegularExpressions;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -28,6 +29,7 @@ namespace Jot
     {
         public MainViewModel ViewModel { get; }
         private bool _isUpdatingContent = false;
+        private ObservableCollection<DocumentHeading> _documentHeadings = new();
 
         public MainWindow()
         {
@@ -49,6 +51,7 @@ namespace Jot
             // Setup simple bindings
             DocumentsList.ItemsSource = ViewModel.Documents;
             SearchBox.Text = ViewModel.SearchText;
+            DocumentIndexList.ItemsSource = _documentHeadings;
             
             // Bind document list selection
             DocumentsList.SelectionChanged += DocumentsList_SelectionChanged;
@@ -116,11 +119,15 @@ namespace Jot
                 // Update the split mode editor and preview
                 UpdateSplitModeContent();
                 UpdatePreviewContent();
+                
+                // Update document index immediately when content changes
                 UpdateDocumentIndex();
+                
+                // Auto-save after a short delay (could be implemented with a timer)
             }
         }
 
-        private void ViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
             {
@@ -147,21 +154,36 @@ namespace Jot
                 // Update title
                 if (TitleTextBox != null)
                 {
-                    TitleTextBox.Text = ViewModel.SelectedDocument.Title;
+                    TitleTextBox.Text = ViewModel.SelectedDocument.Title ?? "";
                 }
                 
                 // Update content in all editors
                 TextEditor.Text = ViewModel.SelectedDocument.Content ?? "";
                 
-                // Update split mode editors
-                var splitEditors = GetSplitModeEditors();
-                if (splitEditors.editor != null)
+                // Update split mode editor specifically
+                if (SplitModeEditor != null)
                 {
-                    splitEditors.editor.Text = ViewModel.SelectedDocument.Content ?? "";
-                    splitEditors.editor.TextChanged += SplitEditor_TextChanged;
+                    SplitModeEditor.Text = ViewModel.SelectedDocument.Content ?? "";
+                    // Remove previous event handler to avoid double subscription
+                    SplitModeEditor.TextChanged -= SplitEditor_TextChanged;
+                    SplitModeEditor.TextChanged += SplitEditor_TextChanged;
                 }
                 
                 // Update previews
+                UpdatePreviewContent();
+            }
+            else
+            {
+                // Clear content when no document is selected
+                if (TitleTextBox != null)
+                {
+                    TitleTextBox.Text = "";
+                }
+                TextEditor.Text = "";
+                if (SplitModeEditor != null)
+                {
+                    SplitModeEditor.Text = "";
+                }
                 UpdatePreviewContent();
             }
             
@@ -176,7 +198,10 @@ namespace Jot
                 ViewModel.SelectedDocument.ModifiedAt = DateTime.Now;
                 
                 // Update the main editor and preview
+                _isUpdatingContent = true;
                 TextEditor.Text = newText;
+                _isUpdatingContent = false;
+                
                 UpdatePreviewContent();
                 UpdateDocumentIndex();
             }
@@ -184,46 +209,31 @@ namespace Jot
 
         private void UpdatePreviewContent()
         {
-            if (ViewModel.SelectedDocument != null)
+            var content = ViewModel.SelectedDocument?.Content ?? "";
+            
+            // Update main preview
+            MarkdownPreview.MarkdownText = content;
+            
+            // Update split mode preview specifically
+            if (SplitModePreview != null)
             {
-                MarkdownPreview.MarkdownText = ViewModel.SelectedDocument.Content ?? "";
-                
-                var splitEditors = GetSplitModeEditors();
-                if (splitEditors.preview != null)
-                {
-                    splitEditors.preview.MarkdownText = ViewModel.SelectedDocument.Content ?? "";
-                }
+                SplitModePreview.MarkdownText = content;
             }
+            
+            System.Diagnostics.Debug.WriteLine($"Updated preview content: {content.Length} characters");
         }
 
         private void UpdateSplitModeContent()
         {
-            var splitEditors = GetSplitModeEditors();
-            if (splitEditors.preview != null && ViewModel.SelectedDocument != null)
+            if (SplitModePreview != null && ViewModel.SelectedDocument != null)
             {
-                splitEditors.preview.MarkdownText = ViewModel.SelectedDocument.Content ?? "";
+                SplitModePreview.MarkdownText = ViewModel.SelectedDocument.Content ?? "";
             }
         }
 
         private (Controls.RichTextEditor? editor, Controls.MarkdownPreview? preview) GetSplitModeEditors()
         {
-            if (SplitModeGrid != null)
-            {
-                Controls.RichTextEditor? editor = null;
-                Controls.MarkdownPreview? preview = null;
-                
-                foreach (var child in SplitModeGrid.Children)
-                {
-                    if (child is Controls.RichTextEditor richEditor)
-                        editor = richEditor;
-                    else if (child is Controls.MarkdownPreview markdownPreview)
-                        preview = markdownPreview;
-                }
-                
-                return (editor, preview);
-            }
-            
-            return (null, null);
+            return (SplitModeEditor, SplitModePreview);
         }
 
         private void UpdateViewMode()
@@ -286,23 +296,37 @@ namespace Jot
 
         private void UpdateDocumentIndex()
         {
-            if (ViewModel.SelectedDocument == null || DocumentIndexList == null)
+            try
             {
-                if (DocumentIndexList != null)
-                    DocumentIndexList.ItemsSource = null;
-                return;
-            }
+                _documentHeadings.Clear();
+                
+                if (ViewModel.SelectedDocument == null)
+                    return;
 
-            var content = ViewModel.SelectedDocument.Content ?? "";
-            var headings = ExtractHeadings(content);
-            
-            DocumentIndexList.ItemsSource = headings;
+                var content = ViewModel.SelectedDocument.Content ?? "";
+                var headings = ExtractHeadings(content);
+                
+                foreach (var heading in headings)
+                {
+                    _documentHeadings.Add(heading);
+                }
+                
+                System.Diagnostics.Debug.WriteLine($"Document index updated with {headings.Count} headings");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error updating document index: {ex.Message}");
+            }
         }
 
-        private ObservableCollection<DocumentHeading> ExtractHeadings(string content)
+        private List<DocumentHeading> ExtractHeadings(string content)
         {
-            var headings = new ObservableCollection<DocumentHeading>();
-            var lines = content.Split('\n');
+            var headings = new List<DocumentHeading>();
+            
+            if (string.IsNullOrEmpty(content))
+                return headings;
+                
+            var lines = content.Split(new[] { '\r', '\n' }, StringSplitOptions.None);
             int lineNumber = 0;
 
             foreach (var line in lines)
@@ -310,28 +334,28 @@ namespace Jot
                 lineNumber++;
                 var trimmedLine = line.Trim();
                 
-                if (trimmedLine.StartsWith("#"))
+                // Match headers using regex - more precise than simple StartsWith
+                var headerMatch = Regex.Match(trimmedLine, @"^(#{1,6})\s+(.+)$");
+                if (headerMatch.Success)
                 {
-                    var level = 0;
-                    while (level < trimmedLine.Length && trimmedLine[level] == '#')
-                        level++;
+                    var level = headerMatch.Groups[1].Value.Length;
+                    var title = headerMatch.Groups[2].Value.Trim();
                     
-                    if (level <= 6 && level < trimmedLine.Length && trimmedLine[level] == ' ')
+                    if (!string.IsNullOrEmpty(title))
                     {
-                        var title = trimmedLine.Substring(level + 1).Trim();
-                        if (!string.IsNullOrEmpty(title))
+                        headings.Add(new DocumentHeading
                         {
-                            headings.Add(new DocumentHeading
-                            {
-                                Title = title,
-                                Level = level,
-                                LineNumber = lineNumber
-                            });
-                        }
+                            Title = title,
+                            Level = level,
+                            LineNumber = lineNumber
+                        });
+                        
+                        System.Diagnostics.Debug.WriteLine($"Found heading: Level {level}, Title: '{title}', Line: {lineNumber}");
                     }
                 }
             }
 
+            System.Diagnostics.Debug.WriteLine($"Extracted {headings.Count} headings from content");
             return headings;
         }
 
@@ -358,6 +382,29 @@ namespace Jot
             // This is a simplified implementation
             // In a real app, you would calculate the actual position and scroll to it
             TextEditor.Focus(FocusState.Programmatic);
+            
+            // Try to calculate approximate position and scroll
+            try
+            {
+                var content = ViewModel.SelectedDocument?.Content ?? "";
+                var lines = content.Split('\n');
+                if (lineNumber > 0 && lineNumber <= lines.Length)
+                {
+                    // Calculate character position
+                    int charPosition = 0;
+                    for (int i = 0; i < lineNumber - 1 && i < lines.Length; i++)
+                    {
+                        charPosition += lines[i].Length + 1; // +1 for newline
+                    }
+                    
+                    // Set cursor position (this is a basic implementation)
+                    // In a real implementation, you'd want to scroll the view as well
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error scrolling to line: {ex.Message}");
+            }
         }
     }
 
