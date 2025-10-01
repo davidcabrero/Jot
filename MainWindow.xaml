@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="Jot.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Jot"
+    xmlns:controls="using:Jot.Controls"
+    xmlns:models="using:Jot.Models"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="Jot - Modern Note Taking">
+
+    <Window.SystemBackdrop>
+        <MicaBackdrop />
+    </Window.SystemBackdrop>
+
+    <Grid x:Name="RootGrid">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title Bar -->
+        <Grid Grid.Row="0" Background="{ThemeResource LayerFillColorDefaultBrush}" 
+              Height="48" Padding="16,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="0" x:Name="TogglePaneButton" 
+                    Background="Transparent" BorderThickness="0"
+                    ToolTipService.ToolTip="Toggle Sidebar">
+                <FontIcon Glyph="&#xE700;" FontSize="16"/>
+            </Button>
+
+            <TextBlock Grid.Column="1" Text="Jot" 
+                       FontWeight="SemiBold" FontSize="16"
+                       VerticalAlignment="Center" HorizontalAlignment="Center"/>
+
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                <Button Background="Transparent" BorderThickness="0"
+                        Click="CreateNewDocument_Click"
+                        ToolTipService.ToolTip="New Document">
+                    <FontIcon Glyph="&#xE710;" FontSize="16"/>
+                </Button>
+                <Button Background="Transparent" BorderThickness="0"
+                        Click="SaveDocument_Click"
+                        ToolTipService.ToolTip="Save">
+                    <FontIcon Glyph="&#xE74E;" FontSize="16"/>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <!-- Main Content -->
+        <NavigationView Grid.Row="1" x:Name="MainNavigationView"
+                        IsBackButtonVisible="Collapsed"
+                        OpenPaneLength="300"
+                        CompactModeThresholdWidth="0"
+                        ExpandedModeThresholdWidth="600">
+
+            <NavigationView.PaneHeader>
+                <Grid Margin="12,8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="Documents" 
+                               FontWeight="SemiBold" FontSize="16" Margin="0,0,0,8"/>
+                    
+                    <TextBox Grid.Row="1" x:Name="SearchBox" 
+                             PlaceholderText="Search documents...">
+                        <TextBox.Resources>
+                            <ResourceDictionary>
+                                <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="Transparent"/>
+                            </ResourceDictionary>
+                        </TextBox.Resources>
+                    </TextBox>
+                </Grid>
+            </NavigationView.PaneHeader>
+
+            <NavigationView.PaneCustomContent>
+                <ListView x:Name="DocumentsList" 
+                          SelectionMode="Single"
+                          Margin="8,0,8,8">
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="models:Document">
+                            <Grid Margin="4" Background="Transparent">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ContextFlyout>
+                                    <MenuFlyout>
+                                        <MenuFlyoutItem Text="Delete"
+                                                        Click="DeleteDocument_Click"
+                                                        CommandParameter="{x:Bind}">
+                                            <MenuFlyoutItem.Icon>
+                                                <FontIcon Glyph="&#xE74D;"/>
+                                            </MenuFlyoutItem.Icon>
+                                        </MenuFlyoutItem>
+                                    </MenuFlyout>
+                                </Grid.ContextFlyout>
+
+                                <TextBlock Grid.Row="0" Text="{x:Bind Title}" 
+                                           FontWeight="SemiBold" 
+                                           TextTrimming="CharacterEllipsis"
+                                           MaxLines="1"/>
+                                
+                                <TextBlock Grid.Row="1" 
+                                           Text="{x:Bind Content}" 
+                                           Opacity="0.7" 
+                                           FontSize="12"
+                                           TextTrimming="CharacterEllipsis"
+                                           MaxLines="2" 
+                                           Margin="0,2,0,0"/>
+                                
+                                <TextBlock Grid.Row="2" 
+                                           Text="{x:Bind ModifiedAt}" 
+                                           Opacity="0.5" 
+                                           FontSize="10"
+                                           Margin="0,4,0,0"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </NavigationView.PaneCustomContent>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="200"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Main Document Area -->
+                <Grid Grid.Column="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Document Header -->
+                    <Border Grid.Row="0" x:Name="DocumentHeaderBorder"
+                            Background="{ThemeResource LayerFillColorDefaultBrush}" 
+                            BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}" 
+                            BorderThickness="0,0,0,1" 
+                            Padding="16,12">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBox Grid.Column="0" x:Name="TitleTextBox"
+                                     FontSize="18" 
+                                     FontWeight="SemiBold"
+                                     BorderThickness="0" 
+                                     Background="Transparent"
+                                     PlaceholderText="Document title..."
+                                     TextChanged="TitleTextBox_TextChanged"/>
+
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                <!-- View Mode Toggle -->
+                                <ToggleButton x:Name="EditModeButton" 
+                                              Content="Edit" 
+                                              ToolTipService.ToolTip="Edit Mode"/>
+                                
+                                <ToggleButton x:Name="PreviewModeButton" 
+                                              Content="Preview" 
+                                              ToolTipService.ToolTip="Preview Mode"/>
+                                
+                                <ToggleButton x:Name="SplitModeButton" 
+                                              Content="Split" 
+                                              ToolTipService.ToolTip="Split Mode"/>
+
+                                <TextBlock Text="Last modified"
+                                           Opacity="0.7" 
+                                           FontSize="12" 
+                                           VerticalAlignment="Center"
+                                           Margin="16,0,0,0"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Editor Container -->
+                    <Grid Grid.Row="1" x:Name="EditorContainer">
+                        
+                        <!-- Edit Mode -->
+                        <controls:RichTextEditor x:Name="TextEditor"/>
+                        
+                        <!-- Preview Mode -->
+                        <controls:MarkdownPreview x:Name="MarkdownPreview" 
+                                                  Visibility="Collapsed"/>
+                        
+                        <!-- Split Mode -->
+                        <Grid x:Name="SplitModeGrid" Visibility="Collapsed">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="2"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <controls:RichTextEditor Grid.Column="0"/>
+                            
+                            <Border Grid.Column="1" Background="{ThemeResource DividerStrokeColorDefaultBrush}"/>
+                            
+                            <controls:MarkdownPreview Grid.Column="2"/>
+                        </Grid>
+                    </Grid>
+
+                    <!-- Empty State -->
+                    <Grid Grid.Row="1" x:Name="EmptyStateGrid">
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="16">
+                            <FontIcon Glyph="&#xE8A5;" FontSize="64" Opacity="0.3"/>
+                            <TextBlock Text="Welcome to Jot" FontSize="24" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Create your first document to get started" Opacity="0.7" HorizontalAlignment="Center"/>
+                            <Button Content="Create New Document" 
+                                    Style="{ThemeResource AccentButtonStyle}"
+                                    Click="CreateNewDocument_Click"/>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+
+                <!-- Splitter -->
+                <Border Grid.Column="1" Width="1" Background="{ThemeResource DividerStrokeColorDefaultBrush}" 
+                        Margin="8,0"/>
+
+                <!-- Document Index -->
+                <Grid Grid.Column="2" Background="{ThemeResource LayerFillColorDefaultBrush}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                            BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+                            BorderThickness="0,0,0,1"
+                            Padding="12,8">
+                        <TextBlock Text="Document Index" 
+                                   FontWeight="SemiBold" 
+                                   FontSize="14"/>
+                    </Border>
+
+                    <ListView Grid.Row="1" x:Name="DocumentIndexList"
+                              SelectionMode="Single"
+                              SelectionChanged="DocumentIndex_SelectionChanged"
+                              Padding="8">
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="local:DocumentHeading">
+                                <Grid>
+                                    <TextBlock Text="{x:Bind IndentedTitle}" 
+                                               FontSize="12"
+                                               TextTrimming="CharacterEllipsis"
+                                               Margin="0,2"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="Padding" Value="4,2"/>
+                                <Setter Property="MinHeight" Value="0"/>
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                    </ListView>
+                </Grid>
+            </Grid>
+        </NavigationView>
+    </Grid>
+</Window>

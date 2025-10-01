@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Application
+    x:Class="Jot.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Jot"
+    xmlns:converters="using:Jot.Converters">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+                <!-- Other merged dictionaries here -->
+            </ResourceDictionary.MergedDictionaries>
+            
+            <!-- Converters -->
+            <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+            <converters:InverseNullToVisibilityConverter x:Key="InverseNullToVisibilityConverter"/>
+            <converters:ViewModeToEditVisibilityConverter x:Key="ViewModeToEditVisibilityConverter"/>
+            <converters:ViewModeToPreviewVisibilityConverter x:Key="ViewModeToPreviewVisibilityConverter"/>
+            <converters:ViewModeToSplitVisibilityConverter x:Key="ViewModeToSplitVisibilityConverter"/>
+            <converters:ViewModeToEditBoolConverter x:Key="ViewModeToEditBoolConverter"/>
+            <converters:ViewModeToPreviewBoolConverter x:Key="ViewModeToPreviewBoolConverter"/>
+            <converters:ViewModeToSplitBoolConverter x:Key="ViewModeToSplitBoolConverter"/>
+            
+            <!-- Styles -->
+            <Style x:Key="ModernButtonStyle" TargetType="Button">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Padding" Value="12,8"/>
+                <Setter Property="CornerRadius" Value="4"/>
+            </Style>
+            
+            <!-- Other app resources here -->
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
