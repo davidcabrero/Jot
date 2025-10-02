@@ -16,13 +16,26 @@
 - **Editor de Markdown en tiempo real** con resaltado de sintaxis
 - **Vista previa en vivo** del contenido formateado
 - **Vista dividida** para edición y vista previa simultáneas
-- **Barra de herramientas con atajos de formato** (Negrita, Cursiva, Código, Encabezados, Listas, etc.)
+- **Barra de herramientas expandida** con atajos de formato:
+  - Formato básico (Negrita, Cursiva, Código, Tachado, Resaltado)
+  - Estructuras (Encabezados, Listas, Citas, Líneas horizontales)
+  - Contenido multimedia (Imágenes, Enlaces)
+  - Elementos interactivos (Secciones plegables, Quizzes)
+  - **Tablas**: Inserción rápida de tablas Markdown
+  - **Emojis**: Selector con menú desplegable
+  - **Fórmulas matemáticas**: Plantillas LaTeX
+  - **Diagramas**: Plantillas Mermaid
+- **Buscar y Reemplazar**: Panel flotante con navegación de resultados
+- **Estadísticas del documento**: Análisis completo de contenido
+- **Barra de estado**: Información en tiempo real (palabras, caracteres, tiempo de lectura, posición del cursor)
+- **Atajos de teclado**: Ctrl+B (negrita), Ctrl+I (cursiva), Ctrl+F (buscar), Ctrl+H (reemplazar)
 - **Soporte avanzado de Markdown** incluyendo:
   - Encabezados (H1-H6)
   - Listas (viñetas, numeradas, tareas)
   - Bloques de código con resaltado de sintaxis
   - Citas y comillas
-  - Tablas y líneas horizontales
+  - Tablas con renderizado visual
+  - Líneas horizontales
   - Formato en línea (negrita, cursiva, tachado, resaltado)
 
 ### **Tipos de Contenido Avanzados**
@@ -33,6 +46,10 @@
   - Resaltado visual e iconos
 - **Secciones Plegables**: Contenido expandible/plegable usando etiquetas `<details>`
 - **Hipervínculos**: Enlaces clicables con indicadores visuales
+- **Tablas**: Renderizado completo de tablas Markdown con headers destacados
+- **Fórmulas Matemáticas**: Soporte para LaTeX con símbolos matemáticos
+- **Diagramas Mermaid**: Vista previa de diagramas con tipos específicos (flowchart, sequence, gantt, pie)
+- **Emojis**: Selector integrado con 48+ emojis comunes
 
 ### **Gestión de Documentos**
 - **Crear, editar, guardar y eliminar documentos**
@@ -62,6 +79,8 @@
 - **Análisis e indexación eficiente** de documentos
 - **Manejo de errores** con respaldos elegantes
 - **Almacenamiento de documentos eficiente en memoria**
+- **Procesamiento optimizado** para tablas, fórmulas y diagramas
+- **Actualización en tiempo real** de estadísticas y métricas
 
 ## Stack Tecnológico
 
@@ -137,7 +156,7 @@
 
 ## Guía de Uso
 
-### Creando Tu Primer Documento
+### Crea Tu Primer Documento
 
 1. **Lanzar Jot**
 2. **Hacer clic en "Crear Nuevo Documento"** o usar el botón + en la barra de herramientas

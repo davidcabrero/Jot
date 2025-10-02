@@ -8,6 +8,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <!-- Toolbar -->
@@ -124,24 +125,138 @@
                         <FontIcon Glyph="&#xE8EB;"/>
                     </Button>
 
+                    <MenuFlyoutSeparator/>
+
+                    <!-- New Advanced Features -->
+                    <Button x:Name="TableButton" Click="TableButton_Click" 
+                            ToolTipService.ToolTip="Insert Table"
+                            Background="Transparent" BorderThickness="0">
+                        <FontIcon Glyph="&#xE8EA;"/>
+                    </Button>
+                    
+                    <Button x:Name="EmojiButton" Click="EmojiButton_Click" 
+                            ToolTipService.ToolTip="Insert Emoji"
+                            Background="Transparent" BorderThickness="0">
+                        <FontIcon Glyph="&#xE76E;"/>
+                    </Button>
+                    
+                    <Button x:Name="MathButton" Click="MathButton_Click" 
+                            ToolTipService.ToolTip="Insert Math Formula"
+                            Background="Transparent" BorderThickness="0">
+                        <FontIcon Glyph="&#xE8EF;"/>
+                    </Button>
+                    
+                    <Button x:Name="DiagramButton" Click="DiagramButton_Click" 
+                            ToolTipService.ToolTip="Insert Diagram"
+                            Background="Transparent" BorderThickness="0">
+                        <FontIcon Glyph="&#xE8B2;"/>
+                    </Button>
+
+                    <MenuFlyoutSeparator/>
+
+                    <!-- Document Tools -->
+                    <Button x:Name="StatsButton" Click="StatsButton_Click" 
+                            ToolTipService.ToolTip="Document Statistics"
+                            Background="Transparent" BorderThickness="0">
+                        <FontIcon Glyph="&#xE9D9;"/>
+                    </Button>
+                    
+                    <Button x:Name="FindReplaceButton" Click="FindReplaceButton_Click" 
+                            ToolTipService.ToolTip="Find and Replace"
+                            Background="Transparent" BorderThickness="0">
+                        <FontIcon Glyph="&#xE721;"/>
+                    </Button>
+
                 </StackPanel>
             </ScrollViewer>
         </Border>
 
         <!-- Text Editor -->
         <Border Grid.Row="1" Background="{ThemeResource LayerFillColorDefaultBrush}">
-            <TextBox x:Name="ContentTextBox" 
-                     AcceptsReturn="True" 
-                     TextWrapping="Wrap"
-                     ScrollViewer.VerticalScrollBarVisibility="Auto"
-                     ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                     BorderThickness="0"
-                     Background="Transparent"
-                     Padding="16"
-                     FontFamily="Consolas, Courier New, monospace"
-                     FontSize="14"
-                     TextChanged="ContentTextBox_TextChanged"
-                     KeyDown="ContentTextBox_KeyDown"/>
+            <Grid>
+                <TextBox x:Name="ContentTextBox" 
+                         AcceptsReturn="True" 
+                         TextWrapping="Wrap"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                         ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                         BorderThickness="0"
+                         Background="Transparent"
+                         Padding="16"
+                         FontFamily="Consolas, Courier New, monospace"
+                         FontSize="14"
+                         TextChanged="ContentTextBox_TextChanged"
+                         KeyDown="ContentTextBox_KeyDown"/>
+                
+                <!-- Find and Replace Panel -->
+                <Border x:Name="FindReplacePanel" 
+                        Background="{ThemeResource LayerFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="4"
+                        Padding="12"
+                        Margin="16"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Top"
+                        Visibility="Collapsed">
+                    <StackPanel Spacing="8">
+                        <TextBox x:Name="FindTextBox" 
+                                 PlaceholderText="Find..."
+                                 Width="200"/>
+                        <TextBox x:Name="ReplaceTextBox" 
+                                 PlaceholderText="Replace with..."
+                                 Width="200"/>
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <Button x:Name="FindNextButton" 
+                                    Content="Find Next"
+                                    Click="FindNextButton_Click"
+                                    Style="{StaticResource AccentButtonStyle}"/>
+                            <Button x:Name="ReplaceButton" 
+                                    Content="Replace"
+                                    Click="ReplaceButton_Click"/>
+                            <Button x:Name="ReplaceAllButton" 
+                                    Content="Replace All"
+                                    Click="ReplaceAllButton_Click"/>
+                            <Button x:Name="CloseFindButton" 
+                                    Content="✕"
+                                    Click="CloseFindButton_Click"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- Status Bar -->
+        <Border Grid.Row="2" Background="{ThemeResource LayerFillColorDefaultBrush}" 
+                BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}" 
+                BorderThickness="0,1,0,0" Padding="16,8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="16">
+                    <TextBlock x:Name="WordCountText" 
+                               Text="Words: 0" 
+                               FontSize="12" 
+                               Opacity="0.7"/>
+                    <TextBlock x:Name="CharCountText" 
+                               Text="Characters: 0" 
+                               FontSize="12" 
+                               Opacity="0.7"/>
+                    <TextBlock x:Name="ReadingTimeText" 
+                               Text="Reading time: 0 min" 
+                               FontSize="12" 
+                               Opacity="0.7"/>
+                </StackPanel>
+                
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                    <TextBlock x:Name="CursorPositionText" 
+                               Text="Line 1, Column 1" 
+                               FontSize="12" 
+                               Opacity="0.7"/>
+                </StackPanel>
+            </Grid>
         </Border>
     </Grid>
 </UserControl>

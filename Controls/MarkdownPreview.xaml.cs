@@ -8,6 +8,7 @@ using Microsoft.UI.Xaml.Media;
 using System.Collections.Generic;
 using System.Linq;
 using System.Diagnostics;
+using System.Text;
 
 namespace Jot.Controls
 {
@@ -216,6 +217,26 @@ namespace Jot.Controls
                         continue;
                     }
                     
+                    // Check for table rows
+                    if (trimmedLine.Contains("|") && !trimmedLine.StartsWith("```"))
+                    {
+                        // Check if this is part of a table
+                        if (IsTableRow(trimmedLine) || IsTableHeader(trimmedLine, i, lines))
+                        {
+                            var tableLines = ExtractTableLines(lines, ref i);
+                            AddTable(tableLines);
+                            continue;
+                        }
+                    }
+                    
+                    // Check for math formulas
+                    if (trimmedLine.StartsWith("$$") || trimmedLine.Contains("$$"))
+                    {
+                        var mathContent = ExtractMathContent(lines, ref i);
+                        AddMathFormula(mathContent);
+                        continue;
+                    }
+                    
                     // Everything else is a paragraph
                     AddFormattedParagraph(trimmedLine);
                 }
@@ -406,6 +427,13 @@ namespace Jot.Controls
 
         private void AddCodeBlock(string code, string language)
         {
+            // Special handling for Mermaid diagrams
+            if (language.ToLower() == "mermaid")
+            {
+                AddMermaidDiagram(code);
+                return;
+            }
+
             var border = new Border
             {
                 Background = new SolidColorBrush(Color.FromArgb(60, 128, 128, 128)),
@@ -443,6 +471,227 @@ namespace Jot.Controls
             stackPanel.Children.Add(textBlock);
             border.Child = stackPanel;
             ContentPanel.Children.Add(border);
+        }
+
+        private void AddMermaidDiagram(string diagramContent)
+        {
+            var border = new Border
+            {
+                Background = new SolidColorBrush(Color.FromArgb(30, 75, 181, 67)), // Green background
+                BorderBrush = new SolidColorBrush(Color.FromArgb(150, 75, 181, 67)),
+                BorderThickness = new Thickness(2),
+                CornerRadius = new CornerRadius(8),
+                Padding = new Thickness(16),
+                Margin = new Thickness(0, 16, 0, 16)
+            };
+
+            var stackPanel = new StackPanel
+            {
+                HorizontalAlignment = HorizontalAlignment.Center
+            };
+
+            // Diagram icon and title
+            var titlePanel = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Margin = new Thickness(0, 0, 0, 12)
+            };
+
+            var diagramIcon = new FontIcon
+            {
+                Glyph = "\uE8B2", // Diagram icon
+                FontSize = 24,
+                Foreground = new SolidColorBrush(Color.FromArgb(255, 75, 181, 67)),
+                Margin = new Thickness(0, 0, 8, 0)
+            };
+            titlePanel.Children.Add(diagramIcon);
+
+            var titleText = new TextBlock
+            {
+                Text = "Mermaid Diagram",
+                FontSize = 16,
+                FontWeight = Microsoft.UI.Text.FontWeights.Bold,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            titlePanel.Children.Add(titleText);
+            stackPanel.Children.Add(titlePanel);
+
+            // Simplified diagram representation
+            var diagramType = DetectMermaidDiagramType(diagramContent);
+            var visualRepresentation = CreateSimplifiedDiagram(diagramContent, diagramType);
+            stackPanel.Children.Add(visualRepresentation);
+
+            // Code preview
+            var codeExpander = new Expander
+            {
+                Header = "View Diagram Code",
+                Margin = new Thickness(0, 12, 0, 0),
+                HorizontalAlignment = HorizontalAlignment.Stretch
+            };
+
+            var codeBlock = new TextBlock
+            {
+                Text = diagramContent,
+                FontFamily = new FontFamily("Cascadia Code, Consolas, Courier New, monospace"),
+                FontSize = 12,
+                TextWrapping = TextWrapping.Wrap,
+                IsTextSelectionEnabled = true
+            };
+
+            codeExpander.Content = codeBlock;
+            stackPanel.Children.Add(codeExpander);
+
+            border.Child = stackPanel;
+            ContentPanel.Children.Add(border);
+        }
+
+        private string DetectMermaidDiagramType(string content)
+        {
+            var firstLine = content.Split('\n')[0].Trim();
+            
+            if (firstLine.StartsWith("graph"))
+                return "flowchart";
+            else if (firstLine.StartsWith("sequenceDiagram"))
+                return "sequence";
+            else if (firstLine.StartsWith("gantt"))
+                return "gantt";
+            else if (firstLine.StartsWith("pie"))
+                return "pie";
+            else if (firstLine.StartsWith("classDiagram"))
+                return "class";
+            else
+                return "generic";
+        }
+
+        private FrameworkElement CreateSimplifiedDiagram(string content, string type)
+        {
+            var container = new Border
+            {
+                Background = new SolidColorBrush(Color.FromArgb(40, 255, 255, 255)),
+                CornerRadius = new CornerRadius(4),
+                Padding = new Thickness(20),
+                MinHeight = 150,
+                HorizontalAlignment = HorizontalAlignment.Stretch
+            };
+
+            var grid = new Grid();
+            
+            switch (type)
+            {
+                case "flowchart":
+                    container.Child = CreateFlowchartPreview(content);
+                    break;
+                case "sequence":
+                    container.Child = CreateSequencePreview();
+                    break;
+                case "gantt":
+                    container.Child = CreateGanttPreview();
+                    break;
+                case "pie":
+                    container.Child = CreatePiePreview();
+                    break;
+                default:
+                    container.Child = CreateGenericDiagramPreview(type);
+                    break;
+            }
+
+            return container;
+        }
+
+        private StackPanel CreateFlowchartPreview(string content)
+        {
+            var panel = new StackPanel
+            {
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+
+            // Simple flowchart representation
+            var elements = new[]
+            {
+                "📋 Start",
+                "⬇️",
+                "⚙️ Process",
+                "⬇️", 
+                "❓ Decision",
+                "⬇️",
+                "✅ End"
+            };
+
+            foreach (var element in elements)
+            {
+                var block = new TextBlock
+                {
+                    Text = element,
+                    FontSize = 14,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    Margin = new Thickness(0, 2, 0, 0)
+                };
+                panel.Children.Add(block);
+            }
+
+            return panel;
+        }
+
+        private StackPanel CreateSequencePreview()
+        {
+            var panel = new StackPanel
+            {
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+
+            panel.Children.Add(new TextBlock { Text = "👤 Actor A", FontSize = 14, HorizontalAlignment = HorizontalAlignment.Center });
+            panel.Children.Add(new TextBlock { Text = "⬇️ Message", FontSize = 12, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0, 4, 0, 0) });
+            panel.Children.Add(new TextBlock { Text = "👤 Actor B", FontSize = 14, HorizontalAlignment = HorizontalAlignment.Center });
+            panel.Children.Add(new TextBlock { Text = "⬆️ Response", FontSize = 12, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0, 4, 0, 0) });
+
+            return panel;
+        }
+
+        private StackPanel CreateGanttPreview()
+        {
+            var panel = new StackPanel
+            {
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+
+            panel.Children.Add(new TextBlock { Text = "📊 Gantt Chart", FontSize = 16, FontWeight = Microsoft.UI.Text.FontWeights.Bold, HorizontalAlignment = HorizontalAlignment.Center });
+            panel.Children.Add(new TextBlock { Text = "📅 Timeline visualization", FontSize = 12, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0, 4, 0, 0) });
+            panel.Children.Add(new TextBlock { Text = "▬▬▬ Task 1", FontSize = 12, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0, 2, 0, 0) });
+            panel.Children.Add(new TextBlock { Text = "  ▬▬▬ Task 2", FontSize = 12, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0, 2, 0, 0) });
+
+            return panel;
+        }
+
+        private StackPanel CreatePiePreview()
+        {
+            var panel = new StackPanel
+            {
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+
+            panel.Children.Add(new TextBlock { Text = "🥧 Pie Chart", FontSize = 16, FontWeight = Microsoft.UI.Text.FontWeights.Bold, HorizontalAlignment = HorizontalAlignment.Center });
+            panel.Children.Add(new TextBlock { Text = "📊 Data visualization", FontSize = 12, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0, 8, 0, 0) });
+
+            return panel;
+        }
+
+        private StackPanel CreateGenericDiagramPreview(string type)
+        {
+            var panel = new StackPanel
+            {
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+
+            panel.Children.Add(new TextBlock { Text = "📈 Diagram", FontSize = 16, FontWeight = Microsoft.UI.Text.FontWeights.Bold, HorizontalAlignment = HorizontalAlignment.Center });
+            panel.Children.Add(new TextBlock { Text = $"Type: {type}", FontSize = 12, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0, 4, 0, 0) });
+
+            return panel;
         }
 
         private void AddHorizontalRule()
@@ -824,6 +1073,247 @@ namespace Jot.Controls
 
             border.Child = mainPanel;
             ContentPanel.Children.Add(border);
+        }
+
+        private bool IsTableRow(string line)
+        {
+            var trimmed = line.Trim();
+            return trimmed.StartsWith("|") && trimmed.EndsWith("|") && trimmed.Count(c => c == '|') >= 2;
+        }
+
+        private bool IsTableHeader(string line, int currentIndex, string[] lines)
+        {
+            if (currentIndex + 1 >= lines.Length) return false;
+            var nextLine = lines[currentIndex + 1].Trim();
+            return IsTableRow(line) && Regex.IsMatch(nextLine, @"^\|[\s\-\|:]+\|$");
+        }
+
+        private List<string> ExtractTableLines(string[] lines, ref int currentIndex)
+        {
+            var tableLines = new List<string>();
+            
+            // Get all consecutive table lines
+            while (currentIndex < lines.Length && IsTableRow(lines[currentIndex].Trim()))
+            {
+                tableLines.Add(lines[currentIndex]);
+                currentIndex++;
+            }
+            currentIndex--; // Adjust because the loop will increment
+            
+            return tableLines;
+        }
+
+        private string ExtractMathContent(string[] lines, ref int currentIndex)
+        {
+            var mathContent = new StringBuilder();
+            var line = lines[currentIndex];
+            
+            if (line.Trim().StartsWith("$$") && line.Trim().EndsWith("$$") && line.Trim().Length > 4)
+            {
+                // Single line math
+                return line.Trim();
+            }
+            
+            // Multi-line math
+            mathContent.AppendLine(line);
+            currentIndex++;
+            
+            while (currentIndex < lines.Length)
+            {
+                line = lines[currentIndex];
+                mathContent.AppendLine(line);
+                
+                if (line.Trim().EndsWith("$$"))
+                {
+                    break;
+                }
+                currentIndex++;
+            }
+            
+            return mathContent.ToString();
+        }
+
+        private void AddTable(List<string> tableLines)
+        {
+            if (tableLines.Count < 2) return;
+
+            var border = new Border
+            {
+                BorderBrush = new SolidColorBrush(Color.FromArgb(100, 128, 128, 128)),
+                BorderThickness = new Thickness(1),
+                CornerRadius = new CornerRadius(4),
+                Margin = new Thickness(0, 12, 0, 12)
+            };
+
+            var grid = new Grid();
+            
+            // Parse header
+            var headerCells = ParseTableRow(tableLines[0]);
+            
+            // Setup columns
+            for (int i = 0; i < headerCells.Count; i++)
+            {
+                grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            }
+            
+            // Setup rows - count all rows except separator
+            var dataRowCount = tableLines.Count - 1; // Subtract header and separator rows
+            for (int i = 0; i < dataRowCount; i++)
+            {
+                grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            }
+
+            int rowIndex = 0;
+            
+            // Add header
+            for (int col = 0; col < headerCells.Count; col++)
+            {
+                var cell = CreateTableCell(headerCells[col], true);
+                Grid.SetRow(cell, rowIndex);
+                Grid.SetColumn(cell, col);
+                grid.Children.Add(cell);
+            }
+            rowIndex++;
+
+            // Add data rows (skip header and separator at index 1)
+            for (int row = 0; row < tableLines.Count; row++)
+            {
+                if (row == 0 || row == 1) continue; // Skip header (0) and separator (1)
+                
+                var cells = ParseTableRow(tableLines[row]);
+                for (int col = 0; col < Math.Min(cells.Count, headerCells.Count); col++)
+                {
+                    var cell = CreateTableCell(cells[col], false);
+                    Grid.SetRow(cell, rowIndex);
+                    Grid.SetColumn(cell, col);
+                    grid.Children.Add(cell);
+                }
+                rowIndex++;
+            }
+
+            border.Child = grid;
+            ContentPanel.Children.Add(border);
+        }
+
+        private List<string> ParseTableRow(string row)
+        {
+            var cells = row.Split('|')
+                .Skip(1) // Skip first empty element (before first |)
+                .Take(row.Split('|').Length - 2) // Skip last empty element (after last |)
+                .Select(cell => cell.Trim())
+                .ToList();
+            return cells;
+        }
+
+        private Border CreateTableCell(string content, bool isHeader)
+        {
+            var cell = new Border
+            {
+                BorderBrush = new SolidColorBrush(Color.FromArgb(50, 128, 128, 128)),
+                BorderThickness = new Thickness(0, 0, 1, 1),
+                Padding = new Thickness(8, 6, 8, 6),
+                Background = isHeader ? 
+                    new SolidColorBrush(Color.FromArgb(30, 100, 149, 237)) : 
+                    new SolidColorBrush(Color.FromArgb(10, 128, 128, 128))
+            };
+
+            var textBlock = new TextBlock
+            {
+                FontWeight = isHeader ? Microsoft.UI.Text.FontWeights.SemiBold : Microsoft.UI.Text.FontWeights.Normal,
+                TextWrapping = TextWrapping.Wrap
+            };
+
+            ProcessInlineFormattingToTextBlock(textBlock, content);
+            cell.Child = textBlock;
+            
+            return cell;
+        }
+
+        private void AddMathFormula(string mathContent)
+        {
+            var border = new Border
+            {
+                Background = new SolidColorBrush(Color.FromArgb(20, 100, 149, 237)),
+                BorderBrush = new SolidColorBrush(Color.FromArgb(100, 100, 149, 237)),
+                BorderThickness = new Thickness(1),
+                CornerRadius = new CornerRadius(6),
+                Padding = new Thickness(16, 12, 16, 12),
+                Margin = new Thickness(0, 12, 0, 12),
+                HorizontalAlignment = HorizontalAlignment.Center
+            };
+
+            var stackPanel = new StackPanel
+            {
+                HorizontalAlignment = HorizontalAlignment.Center
+            };
+
+            // Math icon
+            var mathIcon = new FontIcon
+            {
+                Glyph = "\uE8EF", // Calculator icon
+                FontSize = 20,
+                Foreground = new SolidColorBrush(Color.FromArgb(255, 100, 149, 237)),
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Margin = new Thickness(0, 0, 0, 8)
+            };
+            stackPanel.Children.Add(mathIcon);
+
+            // Process and clean the formula text
+            var formulaText = ProcessMathFormula(mathContent);
+            var textBlock = new TextBlock
+            {
+                Text = formulaText,
+                FontFamily = new FontFamily("Cambria Math, Times New Roman, serif"),
+                FontSize = 14,
+                TextAlignment = TextAlignment.Center,
+                TextWrapping = TextWrapping.Wrap,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                LineHeight = 20,
+                IsTextSelectionEnabled = true
+            };
+            stackPanel.Children.Add(textBlock);
+
+            // Add note
+            var noteBlock = new TextBlock
+            {
+                Text = "📐 Mathematical Formula (LaTeX)",
+                FontSize = 12,
+                Opacity = 0.7,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Margin = new Thickness(0, 8, 0, 0)
+            };
+            stackPanel.Children.Add(noteBlock);
+
+            border.Child = stackPanel;
+            ContentPanel.Children.Add(border);
+        }
+
+        private string ProcessMathFormula(string mathContent)
+        {
+            // Clean up the LaTeX code for better readability
+            var processed = mathContent.Replace("$$", "").Trim();
+            
+            // Replace common LaTeX commands with more readable text
+            processed = processed.Replace("\\begin{align}", "");
+            processed = processed.Replace("\\end{align}", "");
+            processed = processed.Replace("\\\\", "\n");
+            processed = processed.Replace("&=", " = ");
+            processed = processed.Replace("\\pm", "±");
+            processed = processed.Replace("\\sqrt{", "√(");
+            processed = processed.Replace("\\frac{", "");
+            processed = Regex.Replace(processed, @"}\{", " / (");
+            processed = processed.Replace("}{", ") / (");
+            processed = processed.Replace("{", "(");
+            processed = processed.Replace("}", ")");
+            processed = processed.Replace("^2", "²");
+            processed = processed.Replace("^", "^");
+            
+            // Clean up extra spaces and line breaks
+            processed = Regex.Replace(processed, @"\s+", " ");
+            processed = processed.Replace(" \n ", "\n");
+            processed = processed.Trim();
+            
+            return processed;
         }
     }
 }
