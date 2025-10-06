@@ -50,6 +50,7 @@
 - **Fórmulas Matemáticas**: Soporte para LaTeX con símbolos matemáticos
 - **Diagramas Mermaid**: Vista previa de diagramas con tipos específicos (flowchart, sequence, gantt, pie)
 - **Emojis**: Selector integrado con 48+ emojis comunes
+- **Chatbot RAG**: Chatbot para hacer preguntas sobre el contenido del documento
 
 ### **Gestión de Documentos**
 - **Crear, editar, guardar y eliminar documentos**

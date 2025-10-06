@@ -7,12 +7,14 @@ using CommunityToolkit.Mvvm.Input;
 using Jot.Models;
 using Jot.Services;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace Jot.ViewModels
 {
     public partial class MainViewModel : ObservableObject
     {
         private readonly DocumentService _documentService;
+        private readonly ChatbotService _chatbotService;
         
         [ObservableProperty]
         private ObservableCollection<Document> documents = new();
@@ -27,13 +29,19 @@ namespace Jot.ViewModels
         private bool isPaneOpen = true;
 
         [ObservableProperty]
+        private bool isChatbotOpen = false;
+
+        [ObservableProperty]
         private ViewMode currentViewMode = ViewMode.Edit;
 
         private ObservableCollection<Document> _allDocuments = new();
 
+        public ChatbotService ChatbotService => _chatbotService;
+
         public MainViewModel()
         {
             _documentService = new DocumentService();
+            _chatbotService = new ChatbotService(_documentService);
             LoadDocuments();
         }
 
@@ -112,6 +120,12 @@ namespace Jot.ViewModels
         }
 
         [RelayCommand]
+        private void ToggleChatbot()
+        {
+            IsChatbotOpen = !IsChatbotOpen;
+        }
+
+        [RelayCommand]
         private void SetViewMode(ViewMode mode)
         {
             CurrentViewMode = mode;
@@ -143,6 +157,37 @@ namespace Jot.ViewModels
                     Documents.Add(doc);
                 }
             }
+        }
+
+        [RelayCommand]
+        private void OpenDocumentFromChat(string documentTitle)
+        {
+            var document = _allDocuments.FirstOrDefault(d => 
+                d.Title.Equals(documentTitle, StringComparison.OrdinalIgnoreCase));
+            
+            if (document != null)
+            {
+                SelectedDocument = document;
+                IsChatbotOpen = false; // Close chatbot to focus on document
+            }
+        }
+
+        public async Task<string> AskChatbotQuestion(string question)
+        {
+            try
+            {
+                var response = await _chatbotService.AskQuestionAsync(question, _allDocuments.ToList());
+                return response.Answer;
+            }
+            catch (Exception ex)
+            {
+                return $"Error: {ex.Message}";
+            }
+        }
+
+        public List<Document> GetAllDocuments()
+        {
+            return _allDocuments.ToList();
         }
 
         private async void LoadDocuments()
@@ -186,6 +231,28 @@ namespace Jot.ViewModels
         {
             // Automatically search when text changes
             SearchDocuments();
+        }
+
+        [RelayCommand]
+        private async Task OpenChatbot()
+        {
+            try
+            {
+                var chatbotDialog = new Jot.Dialogs.ChatbotDialog(_chatbotService, _allDocuments.ToList());
+                if (App.MainWindow?.Content?.XamlRoot != null)
+                {
+                    chatbotDialog.XamlRoot = App.MainWindow.Content.XamlRoot;
+                    await chatbotDialog.ShowAsync();
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine("Cannot show chatbot: XamlRoot is null");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error opening chatbot: {ex.Message}");
+            }
         }
     }
 }

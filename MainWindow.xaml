@@ -8,6 +8,7 @@
     xmlns:models="using:Jot.Models"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:converters="using:Jot.Converters"
     mc:Ignorable="d"
     Title="Jot - Modern Note Taking">
 
@@ -50,6 +51,11 @@
                         Click="SaveDocument_Click"
                         ToolTipService.ToolTip="Save">
                     <FontIcon Glyph="&#xE74E;" FontSize="16"/>
+                </Button>
+                <Button Background="Transparent" BorderThickness="0"
+                        Click="ToggleChatbot_Click"
+                        ToolTipService.ToolTip="AI Assistant">
+                    <FontIcon Glyph="&#xE8F2;" FontSize="16"/>
                 </Button>
             </StackPanel>
         </Grid>

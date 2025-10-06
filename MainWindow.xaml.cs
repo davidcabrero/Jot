@@ -34,16 +34,29 @@ namespace Jot
         public MainWindow()
         {
             this.InitializeComponent();
+            
+            // Set up data context
             ViewModel = new MainViewModel();
             
-            // Setup bindings manually
-            SetupBindings();
+            // Initialize view mode buttons
+            SetupViewModeButtons();
             
             // Set window properties
             Title = "Jot - Modern Note Taking";
             
             // Set minimum window size
             this.AppWindow.Resize(new Windows.Graphics.SizeInt32(1000, 700));
+            
+            // Setup bindings after initialization
+            SetupBindings();
+        }
+
+        private void SetupViewModeButtons()
+        {
+            // Setup view mode button events
+            EditModeButton.Click += (s, e) => ViewModel.SetViewModeCommand.Execute(ViewMode.Edit);
+            PreviewModeButton.Click += (s, e) => ViewModel.SetViewModeCommand.Execute(ViewMode.Preview);
+            SplitModeButton.Click += (s, e) => ViewModel.SetViewModeCommand.Execute(ViewMode.Split);
         }
 
         private void SetupBindings()
@@ -58,9 +71,6 @@ namespace Jot
             
             // Setup event handlers for buttons
             TogglePaneButton.Click += (s, e) => ViewModel.ToggleSidebarCommand.Execute(null);
-            EditModeButton.Click += (s, e) => ViewModel.SetViewModeCommand.Execute(ViewMode.Edit);
-            PreviewModeButton.Click += (s, e) => ViewModel.SetViewModeCommand.Execute(ViewMode.Preview);
-            SplitModeButton.Click += (s, e) => ViewModel.SetViewModeCommand.Execute(ViewMode.Split);
             
             // Setup text binding for text editors
             TextEditor.TextChanged += TextEditor_TextChanged;
@@ -93,6 +103,11 @@ namespace Jot
             {
                 ViewModel.DeleteDocumentCommand.Execute(document);
             }
+        }
+
+        private void ToggleChatbot_Click(object sender, RoutedEventArgs e)
+        {
+            ViewModel.OpenChatbotCommand.Execute(null);
         }
 
         private void DocumentsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
