@@ -15,6 +15,7 @@ namespace Jot.ViewModels
     {
         private readonly DocumentService _documentService;
         private readonly ChatbotService _chatbotService;
+        private readonly PdfExportService _pdfExportService;
         
         [ObservableProperty]
         private ObservableCollection<Document> documents = new();
@@ -34,6 +35,9 @@ namespace Jot.ViewModels
         [ObservableProperty]
         private ViewMode currentViewMode = ViewMode.Edit;
 
+        [ObservableProperty]
+        private bool isExportingPdf = false;
+
         private ObservableCollection<Document> _allDocuments = new();
 
         public ChatbotService ChatbotService => _chatbotService;
@@ -42,6 +46,7 @@ namespace Jot.ViewModels
         {
             _documentService = new DocumentService();
             _chatbotService = new ChatbotService(_documentService);
+            _pdfExportService = new PdfExportService();
             LoadDocuments();
         }
 
@@ -253,6 +258,82 @@ namespace Jot.ViewModels
             {
                 System.Diagnostics.Debug.WriteLine($"Error opening chatbot: {ex.Message}");
             }
+        }
+
+        [RelayCommand]
+        private async Task ExportCurrentDocumentToPdf()
+        {
+            if (SelectedDocument == null)
+                return;
+
+            try
+            {
+                IsExportingPdf = true;
+                
+                // Save current document first to ensure latest changes are included
+                await SaveCurrentDocument();
+                
+                // Export to PDF
+                var success = await _pdfExportService.ExportDocumentToPdfAsync(SelectedDocument);
+                
+                if (success)
+                {
+                    // Show success notification (you might want to implement a notification service)
+                    System.Diagnostics.Debug.WriteLine($"Successfully exported '{SelectedDocument.Title}' to PDF");
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine("PDF export was cancelled or failed");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error exporting to PDF: {ex.Message}");
+            }
+            finally
+            {
+                IsExportingPdf = false;
+            }
+        }
+
+        [RelayCommand]
+        private async Task ExportDocumentToPdf(Document document)
+        {
+            if (document == null)
+                return;
+
+            try
+            {
+                IsExportingPdf = true;
+                
+                // Export the specified document to PDF
+                var success = await _pdfExportService.ExportDocumentToPdfAsync(document);
+                
+                if (success)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Successfully exported '{document.Title}' to PDF");
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine("PDF export was cancelled or failed");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error exporting to PDF: {ex.Message}");
+            }
+            finally
+            {
+                IsExportingPdf = false;
+            }
+        }
+
+        [RelayCommand]
+        private void ApplyTextColor(string colorCode)
+        {
+            // This command can be used to apply text color formatting
+            // The actual implementation is handled in the RichTextEditor control
+            System.Diagnostics.Debug.WriteLine($"Text color applied: {colorCode}");
         }
     }
 }

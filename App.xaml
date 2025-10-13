@@ -13,6 +13,8 @@
             </ResourceDictionary.MergedDictionaries>
             
             <!-- Converters -->
+            <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+            <converters:NullToBooleanConverter x:Key="NullToBooleanConverter"/>
             <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
             <converters:InverseNullToVisibilityConverter x:Key="InverseNullToVisibilityConverter"/>
             <converters:ViewModeToEditVisibilityConverter x:Key="ViewModeToEditVisibilityConverter"/>

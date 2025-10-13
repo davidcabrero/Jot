@@ -53,6 +53,12 @@
                     <FontIcon Glyph="&#xE74E;" FontSize="16"/>
                 </Button>
                 <Button Background="Transparent" BorderThickness="0"
+                        Click="ExportToPdf_Click"
+                        ToolTipService.ToolTip="Export to PDF"
+                        IsEnabled="{Binding SelectedDocument, Converter={StaticResource NullToBooleanConverter}, Mode=OneWay}">
+                    <FontIcon Glyph="&#xE8A7;" FontSize="16"/>
+                </Button>
+                <Button Background="Transparent" BorderThickness="0"
                         Click="ToggleChatbot_Click"
                         ToolTipService.ToolTip="AI Assistant">
                     <FontIcon Glyph="&#xE8F2;" FontSize="16"/>
@@ -102,6 +108,14 @@
                                 </Grid.RowDefinitions>
                                 <Grid.ContextFlyout>
                                     <MenuFlyout>
+                                        <MenuFlyoutItem Text="Export to PDF"
+                                                        Click="ExportDocumentToPdf_Click"
+                                                        CommandParameter="{x:Bind}">
+                                            <MenuFlyoutItem.Icon>
+                                                <FontIcon Glyph="&#xE8A7;"/>
+                                            </MenuFlyoutItem.Icon>
+                                        </MenuFlyoutItem>
+                                        <MenuFlyoutSeparator/>
                                         <MenuFlyoutItem Text="Delete"
                                                         Click="DeleteDocument_Click"
                                                         CommandParameter="{x:Bind}">
@@ -276,5 +290,16 @@
                 </Grid>
             </Grid>
         </NavigationView>
+
+        <!-- Loading overlay for PDF export - Using traditional binding -->
+        <Grid x:Name="LoadingOverlay" 
+              Background="{ThemeResource SystemControlBackgroundAccentBrush}" 
+              Opacity="0.8"
+              Visibility="{Binding IsExportingPdf, Converter={StaticResource BooleanToVisibilityConverter}, Mode=OneWay}">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="16">
+                <ProgressRing IsActive="True" Width="48" Height="48"/>
+                <TextBlock Text="Exporting to PDF..." FontSize="16" HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Grid>
     </Grid>
 </Window>

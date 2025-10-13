@@ -44,6 +44,59 @@
                         <FontIcon Glyph="&#xE7E6;"/>
                     </Button>
 
+                    <!-- Text Color Picker -->
+                    <DropDownButton x:Name="TextColorButton" 
+                                    ToolTipService.ToolTip="Text Color"
+                                    Background="Transparent" BorderThickness="0">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <FontIcon Glyph="&#xE790;" />
+                            <Border Width="12" Height="3" Background="{x:Bind CurrentTextColor, Mode=OneWay}" 
+                                    VerticalAlignment="Bottom"/>
+                        </StackPanel>
+                        <DropDownButton.Flyout>
+                            <Flyout x:Name="ColorPickerFlyout">
+                                <StackPanel Spacing="12" Width="200">
+                                    <TextBlock Text="Text Color" FontWeight="SemiBold"/>
+                                    
+                                    <!-- Quick Colors -->
+                                    <TextBlock Text="Quick Colors" FontSize="12" Opacity="0.8"/>
+                                    <GridView x:Name="QuickColorsGrid" 
+                                              SelectionMode="None"
+                                              IsItemClickEnabled="False"
+                                              ScrollViewer.HorizontalScrollMode="Disabled"
+                                              ScrollViewer.VerticalScrollMode="Disabled"
+                                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                              ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                                              Margin="0,4">
+                                        <GridView.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <VariableSizedWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="8"/>
+                                            </ItemsPanelTemplate>
+                                        </GridView.ItemsPanel>
+                                    </GridView>
+                                    
+                                    <!-- Advanced Color Picker -->
+                                    <TextBlock Text="Custom Color" FontSize="12" Opacity="0.8"/>
+                                    <ColorPicker x:Name="CustomColorPicker" 
+                                                 IsColorSliderVisible="True"
+                                                 IsColorChannelTextInputVisible="True"
+                                                 IsHexInputVisible="True"
+                                                 ColorChanged="CustomColorPicker_ColorChanged"/>
+                                    
+                                    <!-- Action Buttons -->
+                                    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                                        <Button Content="Reset" 
+                                                Click="ResetTextColor_Click"
+                                                Style="{ThemeResource DefaultButtonStyle}"/>
+                                        <Button Content="Apply" 
+                                                Click="ApplyTextColor_Click"
+                                                Style="{ThemeResource AccentButtonStyle}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Flyout>
+                        </DropDownButton.Flyout>
+                    </DropDownButton>
+
                     <MenuFlyoutSeparator/>
 
                     <!-- Code -->

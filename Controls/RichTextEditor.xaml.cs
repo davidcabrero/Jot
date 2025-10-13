@@ -9,6 +9,7 @@ using Windows.Storage;
 using Windows.Storage.Pickers;
 using System.Linq;
 using Windows.UI;
+using System.Collections.Generic;
 
 namespace Jot.Controls
 {
@@ -18,10 +19,20 @@ namespace Jot.Controls
             DependencyProperty.Register(nameof(Text), typeof(string), typeof(RichTextEditor),
                 new PropertyMetadata(string.Empty, OnTextChanged));
 
+        public static readonly DependencyProperty CurrentTextColorProperty =
+            DependencyProperty.Register(nameof(CurrentTextColor), typeof(SolidColorBrush), typeof(RichTextEditor),
+                new PropertyMetadata(new SolidColorBrush(Color.FromArgb(255, 0, 0, 0))));
+
         public string Text
         {
             get => (string)GetValue(TextProperty);
             set => SetValue(TextProperty, value);
+        }
+
+        public SolidColorBrush CurrentTextColor
+        {
+            get => (SolidColorBrush)GetValue(CurrentTextColorProperty);
+            set => SetValue(CurrentTextColorProperty, value);
         }
 
         private static void OnTextChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -35,11 +46,85 @@ namespace Jot.Controls
             }
         }
 
+        private readonly Dictionary<string, Color> _predefinedColors = new()
+        {
+            { "Black", Color.FromArgb(255, 0, 0, 0) },
+            { "Red", Color.FromArgb(255, 255, 0, 0) },
+            { "Green", Color.FromArgb(255, 0, 128, 0) },
+            { "Blue", Color.FromArgb(255, 0, 0, 255) },
+            { "Orange", Color.FromArgb(255, 255, 165, 0) },
+            { "Purple", Color.FromArgb(255, 128, 0, 128) },
+            { "Brown", Color.FromArgb(255, 139, 69, 19) },
+            { "Pink", Color.FromArgb(255, 255, 192, 203) },
+            { "Gray", Color.FromArgb(255, 128, 128, 128) },
+            { "Dark Red", Color.FromArgb(255, 139, 0, 0) },
+            { "Dark Green", Color.FromArgb(255, 0, 100, 0) },
+            { "Dark Blue", Color.FromArgb(255, 0, 0, 139) },
+            { "Gold", Color.FromArgb(255, 255, 215, 0) },
+            { "Indigo", Color.FromArgb(255, 75, 0, 130) },
+            { "Maroon", Color.FromArgb(255, 128, 0, 0) },
+            { "Teal", Color.FromArgb(255, 0, 128, 128) }
+        };
+
         public event EventHandler<string>? TextChanged;
 
         public RichTextEditor()
         {
             this.InitializeComponent();
+            InitializeColorPicker();
+        }
+
+        private void InitializeColorPicker()
+        {
+            // Add quick color buttons to GridView
+            var colorButtons = new List<Button>();
+            
+            foreach (var colorPair in _predefinedColors)
+            {
+                var colorButton = new Button
+                {
+                    Width = 20,
+                    Height = 20,
+                    Background = new SolidColorBrush(colorPair.Value),
+                    BorderBrush = new SolidColorBrush(Color.FromArgb(255, 128, 128, 128)),
+                    BorderThickness = new Thickness(1),
+                    CornerRadius = new CornerRadius(2),
+                    Margin = new Thickness(1)
+                };
+
+                // Set tooltip
+                ToolTipService.SetToolTip(colorButton, colorPair.Key);
+
+                colorButton.Click += (sender, e) =>
+                {
+                    CurrentTextColor = new SolidColorBrush(colorPair.Value);
+                    ApplyTextColor_Click(sender, e);
+                };
+
+                colorButtons.Add(colorButton);
+            }
+
+            QuickColorsGrid.ItemsSource = colorButtons;
+        }
+
+        private void CustomColorPicker_ColorChanged(ColorPicker sender, ColorChangedEventArgs args)
+        {
+            CurrentTextColor = new SolidColorBrush(args.NewColor);
+        }
+
+        private void ApplyTextColor_Click(object sender, RoutedEventArgs e)
+        {
+            var color = CurrentTextColor.Color;
+            var hexColor = $"#{color.R:X2}{color.G:X2}{color.B:X2}";
+            
+            InsertMarkdown($"<span style=\"color: {hexColor}\">", "</span>");
+            ColorPickerFlyout.Hide();
+        }
+
+        private void ResetTextColor_Click(object sender, RoutedEventArgs e)
+        {
+            CurrentTextColor = new SolidColorBrush(Color.FromArgb(255, 0, 0, 0));
+            CustomColorPicker.Color = Color.FromArgb(255, 0, 0, 0);
         }
 
         private void ContentTextBox_TextChanged(object sender, TextChangedEventArgs e)

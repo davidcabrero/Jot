@@ -745,6 +745,7 @@ namespace Jot.Controls
                 // Find all potential matches
                 var patterns = new[]
                 {
+                    (@"<span style=""color:\s*([^""]+)"">([^<]+)</span>", "color"), // <span style="color: #color">text</span>
                     (@"\*\*(.+?)\*\*", "bold"),          // **bold**
                     (@"__(.+?)__", "bold"),              // __bold__
                     (@"\*(.+?)\*", "italic"),            // *italic*
@@ -794,6 +795,19 @@ namespace Jot.Controls
 
                 switch (earliestType)
                 {
+                    case "color":
+                        // Handle colored text
+                        var colorValue = earliestMatch.Groups[1].Value.Trim();
+                        matchedText = earliestMatch.Groups[2].Value;
+                        run.Text = matchedText;
+                        
+                        // Parse color value
+                        if (TryParseColor(colorValue, out Color color))
+                        {
+                            run.Foreground = new SolidColorBrush(color);
+                        }
+                        break;
+                        
                     case "link":
                         // For links, show the link text with special formatting
                         matchedText = earliestMatch.Groups[1].Value; // Link text
@@ -837,6 +851,88 @@ namespace Jot.Controls
             }
 
             return runs;
+        }
+
+        private bool TryParseColor(string colorString, out Color color)
+        {
+            color = Color.FromArgb(255, 0, 0, 0); // Black
+            
+            try
+            {
+                colorString = colorString.Trim().ToLowerInvariant();
+                
+                // Handle hex colors
+                if (colorString.StartsWith("#"))
+                {
+                    var hex = colorString.Substring(1);
+                    if (hex.Length == 6)
+                    {
+                        var r = Convert.ToByte(hex.Substring(0, 2), 16);
+                        var g = Convert.ToByte(hex.Substring(2, 2), 16);
+                        var b = Convert.ToByte(hex.Substring(4, 2), 16);
+                        color = Color.FromArgb(255, r, g, b);
+                        return true;
+                    }
+                    else if (hex.Length == 3)
+                    {
+                        var r = Convert.ToByte(hex.Substring(0, 1) + hex.Substring(0, 1), 16);
+                        var g = Convert.ToByte(hex.Substring(1, 1) + hex.Substring(1, 1), 16);
+                        var b = Convert.ToByte(hex.Substring(2, 1) + hex.Substring(2, 1), 16);
+                        color = Color.FromArgb(255, r, g, b);
+                        return true;
+                    }
+                }
+                
+                // Handle RGB colors
+                if (colorString.StartsWith("rgb("))
+                {
+                    var values = colorString.Substring(4, colorString.Length - 5).Split(',');
+                    if (values.Length == 3)
+                    {
+                        var r = byte.Parse(values[0].Trim());
+                        var g = byte.Parse(values[1].Trim());
+                        var b = byte.Parse(values[2].Trim());
+                        color = Color.FromArgb(255, r, g, b);
+                        return true;
+                    }
+                }
+                
+                // Handle named colors
+                var namedColors = new Dictionary<string, Color>
+                {
+                    {"black", Color.FromArgb(255, 0, 0, 0)},
+                    {"white", Color.FromArgb(255, 255, 255, 255)},
+                    {"red", Color.FromArgb(255, 255, 0, 0)},
+                    {"green", Color.FromArgb(255, 0, 128, 0)},
+                    {"blue", Color.FromArgb(255, 0, 0, 255)},
+                    {"yellow", Color.FromArgb(255, 255, 255, 0)},
+                    {"orange", Color.FromArgb(255, 255, 165, 0)},
+                    {"purple", Color.FromArgb(255, 128, 0, 128)},
+                    {"pink", Color.FromArgb(255, 255, 192, 203)},
+                    {"brown", Color.FromArgb(255, 139, 69, 19)},
+                    {"gray", Color.FromArgb(255, 128, 128, 128)},
+                    {"grey", Color.FromArgb(255, 128, 128, 128)},
+                    {"darkred", Color.FromArgb(255, 139, 0, 0)},
+                    {"darkgreen", Color.FromArgb(255, 0, 100, 0)},
+                    {"darkblue", Color.FromArgb(255, 0, 0, 139)},
+                    {"gold", Color.FromArgb(255, 255, 215, 0)},
+                    {"silver", Color.FromArgb(255, 192, 192, 192)},
+                    {"maroon", Color.FromArgb(255, 128, 0, 0)},
+                    {"navy", Color.FromArgb(255, 0, 0, 128)},
+                    {"teal", Color.FromArgb(255, 0, 128, 128)}
+                };
+                
+                if (namedColors.TryGetValue(colorString, out color))
+                {
+                    return true;
+                }
+            }
+            catch
+            {
+                // If parsing fails, fall back to black
+            }
+            
+            return false;
         }
 
         private void AddImage(string altText, string imageSrc)

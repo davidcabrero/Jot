@@ -98,6 +98,8 @@
 <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
 <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.250916003" />
 <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+<PackageReference Include="PdfSharpCore" Version="1.3.65" />
+<PackageReference Include="Markdig" Version="0.37.0" />
 ```
 
 ## Requisitos del Sistema

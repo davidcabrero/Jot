@@ -47,6 +47,9 @@ namespace Jot
             // Set minimum window size
             this.AppWindow.Resize(new Windows.Graphics.SizeInt32(1000, 700));
             
+            // Initialize the loading overlay to be hidden initially
+            LoadingOverlay.Visibility = Visibility.Collapsed;
+            
             // Setup bindings after initialization
             SetupBindings();
         }
@@ -110,6 +113,19 @@ namespace Jot
             ViewModel.OpenChatbotCommand.Execute(null);
         }
 
+        private void ExportToPdf_Click(object sender, RoutedEventArgs e)
+        {
+            ViewModel.ExportCurrentDocumentToPdfCommand.Execute(null);
+        }
+
+        private void ExportDocumentToPdf_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is MenuFlyoutItem menuItem && menuItem.CommandParameter is Models.Document document)
+            {
+                ViewModel.ExportDocumentToPdfCommand.Execute(document);
+            }
+        }
+
         private void DocumentsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (DocumentsList.SelectedItem is Models.Document selectedDoc)
@@ -157,6 +173,17 @@ namespace Jot
                 case nameof(ViewModel.IsPaneOpen):
                     MainNavigationView.IsPaneOpen = ViewModel.IsPaneOpen;
                     break;
+                case nameof(ViewModel.IsExportingPdf):
+                    UpdateLoadingOverlayVisibility();
+                    break;
+            }
+        }
+
+        private void UpdateLoadingOverlayVisibility()
+        {
+            if (LoadingOverlay != null)
+            {
+                LoadingOverlay.Visibility = ViewModel.IsExportingPdf ? Visibility.Visible : Visibility.Collapsed;
             }
         }
 
