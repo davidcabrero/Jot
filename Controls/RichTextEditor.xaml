@@ -219,7 +219,6 @@
                             Background="Transparent" BorderThickness="0">
                         <FontIcon Glyph="&#xE721;"/>
                     </Button>
-
                 </StackPanel>
             </ScrollViewer>
         </Border>
@@ -227,6 +226,7 @@
         <!-- Text Editor -->
         <Border Grid.Row="1" Background="{ThemeResource LayerFillColorDefaultBrush}">
             <Grid>
+                <!-- Main Text Editor -->
                 <TextBox x:Name="ContentTextBox" 
                          AcceptsReturn="True" 
                          TextWrapping="Wrap"

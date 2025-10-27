@@ -1,14 +1,17 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Shapes;
 using System;
 using System.Text.RegularExpressions;
 using Windows.UI;
 using Microsoft.UI.Xaml.Documents;
-using Microsoft.UI.Xaml.Media;
 using System.Collections.Generic;
 using System.Linq;
 using System.Diagnostics;
 using System.Text;
+using Windows.Foundation;
 
 namespace Jot.Controls
 {
@@ -24,6 +27,16 @@ namespace Jot.Controls
             set => SetValue(MarkdownTextProperty, value);
         }
 
+        // Annotation mode properties
+        private bool _isAnnotationMode = false;
+        private bool _isAnnotating = false;
+        private Polyline? _currentAnnotation;
+        private Color _annotationColor = Color.FromArgb(255, 255, 0, 0); // Red
+        private double _annotationSize = 2.0;
+        private readonly List<UIElement> _annotations = new();
+
+        public event EventHandler<bool>? AnnotationModeChanged;
+
         private static void OnMarkdownTextChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is MarkdownPreview preview && e.NewValue is string markdownText)
@@ -35,6 +48,13 @@ namespace Jot.Controls
         public MarkdownPreview()
         {
             this.InitializeComponent();
+            InitializeAnnotationMode();
+        }
+
+        private void InitializeAnnotationMode()
+        {
+            // Set default annotation color (select red by default)
+            RedAnnotationBtn.BorderBrush = new SolidColorBrush(Color.FromArgb(255, 255, 255, 255));
         }
 
         private void RenderMarkdown(string markdown)
@@ -1410,6 +1430,193 @@ namespace Jot.Controls
             processed = processed.Trim();
             
             return processed;
+        }
+
+        // Annotation Mode Methods
+        private void AnnotationModeButton_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleAnnotationMode();
+        }
+
+        private void ToggleAnnotationMode()
+        {
+            _isAnnotationMode = !_isAnnotationMode;
+            
+            if (_isAnnotationMode)
+            {
+                // Enable annotation mode
+                AnnotationCanvas.Visibility = Visibility.Visible;
+                AnnotationCanvas.IsHitTestVisible = true;
+                AnnotationToolbar.Visibility = Visibility.Visible;
+                
+                // Change button appearance
+                AnnotationModeButton.Background = new SolidColorBrush(Color.FromArgb(50, 255, 165, 0));
+                
+                System.Diagnostics.Debug.WriteLine("Annotation mode enabled on Preview - You can now draw on the document");
+            }
+            else
+            {
+                // Disable annotation mode
+                AnnotationCanvas.Visibility = Visibility.Collapsed;
+                AnnotationCanvas.IsHitTestVisible = false;
+                AnnotationToolbar.Visibility = Visibility.Collapsed;
+                
+                // Reset button appearance
+                AnnotationModeButton.Background = new SolidColorBrush(Color.FromArgb(0, 0, 0, 0)); // Transparent
+                
+                System.Diagnostics.Debug.WriteLine("Annotation mode disabled");
+            }
+
+            // Notify about the mode change
+            AnnotationModeChanged?.Invoke(this, _isAnnotationMode);
+        }
+
+        private void AnnotationCanvas_PointerPressed(object sender, PointerRoutedEventArgs e)
+        {
+            if (!_isAnnotationMode) return;
+
+            _isAnnotating = true;
+            var position = e.GetCurrentPoint(AnnotationCanvas).Position;
+            
+            _currentAnnotation = new Polyline
+            {
+                Stroke = new SolidColorBrush(_annotationColor),
+                StrokeThickness = _annotationSize,
+                StrokeLineJoin = PenLineJoin.Round,
+                StrokeStartLineCap = PenLineCap.Round,
+                StrokeEndLineCap = PenLineCap.Round,
+                Opacity = 0.8
+            };
+
+            _currentAnnotation.Points.Add(position);
+            AnnotationCanvas.Children.Add(_currentAnnotation);
+            AnnotationCanvas.CapturePointer(e.Pointer);
+        }
+
+        private void AnnotationCanvas_PointerMoved(object sender, PointerRoutedEventArgs e)
+        {
+            if (!_isAnnotationMode || !_isAnnotating || _currentAnnotation == null) return;
+
+            var position = e.GetCurrentPoint(AnnotationCanvas).Position;
+            _currentAnnotation.Points.Add(position);
+        }
+
+        private void AnnotationCanvas_PointerReleased(object sender, PointerRoutedEventArgs e)
+        {
+            if (!_isAnnotationMode || !_isAnnotating) return;
+
+            if (_currentAnnotation != null && _currentAnnotation.Points.Count > 0)
+            {
+                _annotations.Add(_currentAnnotation);
+                System.Diagnostics.Debug.WriteLine($"Annotation completed with {_currentAnnotation.Points.Count} points");
+            }
+
+            _isAnnotating = false;
+            _currentAnnotation = null;
+            AnnotationCanvas.ReleasePointerCapture(e.Pointer);
+        }
+
+        private void AnnotationCanvas_PointerCaptureLost(object sender, object e)
+        {
+            if (_isAnnotating && _currentAnnotation != null)
+            {
+                _annotations.Add(_currentAnnotation);
+            }
+            
+            _isAnnotating = false;
+            _currentAnnotation = null;
+        }
+
+        private void AnnotationColor_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Tag is string colorName)
+            {
+                // Reset all borders
+                RedAnnotationBtn.BorderBrush = new SolidColorBrush(Color.FromArgb(0, 0, 0, 0));
+                BlueAnnotationBtn.BorderBrush = new SolidColorBrush(Color.FromArgb(0, 0, 0, 0));
+                GreenAnnotationBtn.BorderBrush = new SolidColorBrush(Color.FromArgb(0, 0, 0, 0));
+                YellowAnnotationBtn.BorderBrush = new SolidColorBrush(Color.FromArgb(0, 0, 0, 0));
+
+                // Set new color and highlight selected button
+                switch (colorName)
+                {
+                    case "Red":
+                        button.BorderBrush = new SolidColorBrush(Color.FromArgb(255, 255, 255, 255));
+                        _annotationColor = Color.FromArgb(255, 255, 0, 0);
+                        break;
+                    case "Blue":
+                        button.BorderBrush = new SolidColorBrush(Color.FromArgb(255, 255, 255, 255));
+                        _annotationColor = Color.FromArgb(255, 0, 0, 255);
+                        break;
+                    case "Green":
+                        button.BorderBrush = new SolidColorBrush(Color.FromArgb(255, 255, 255, 255));
+                        _annotationColor = Color.FromArgb(255, 0, 128, 0);
+                        break;
+                    case "Yellow":
+                        button.BorderBrush = new SolidColorBrush(Color.FromArgb(255, 128, 128, 128));
+                        _annotationColor = Color.FromArgb(255, 255, 165, 0); // Orange for better visibility
+                        break;
+                    default:
+                        _annotationColor = Color.FromArgb(255, 255, 0, 0);
+                        break;
+                }
+
+                System.Diagnostics.Debug.WriteLine($"Annotation color changed to: {colorName}");
+            }
+        }
+
+        private void AnnotationSizeSlider_ValueChanged(object sender, Microsoft.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs e)
+        {
+            _annotationSize = e.NewValue;
+            System.Diagnostics.Debug.WriteLine($"Annotation size changed to: {_annotationSize}");
+        }
+
+        private void UndoAnnotation_Click(object sender, RoutedEventArgs e)
+        {
+            if (_annotations.Count > 0)
+            {
+                var lastAnnotation = _annotations[_annotations.Count - 1];
+                AnnotationCanvas.Children.Remove(lastAnnotation);
+                _annotations.RemoveAt(_annotations.Count - 1);
+                
+                System.Diagnostics.Debug.WriteLine("Last annotation undone");
+            }
+        }
+
+        private void ClearAnnotations_Click(object sender, RoutedEventArgs e)
+        {
+            AnnotationCanvas.Children.Clear();
+            _annotations.Clear();
+            
+            System.Diagnostics.Debug.WriteLine("All annotations cleared");
+        }
+
+        private void ExitAnnotationMode_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleAnnotationMode();
+        }
+
+        // Public methods for external control
+        public void SetAnnotationMode(bool enabled)
+        {
+            if (_isAnnotationMode != enabled)
+            {
+                ToggleAnnotationMode();
+            }
+        }
+
+        public bool IsAnnotationModeActive => _isAnnotationMode;
+
+        public void SaveAnnotations()
+        {
+            // TODO: Implement saving annotations to document metadata
+            System.Diagnostics.Debug.WriteLine($"Saved {_annotations.Count} annotations");
+        }
+
+        public void LoadAnnotations()
+        {
+            // TODO: Implement loading annotations from document metadata
+            System.Diagnostics.Debug.WriteLine("Loading annotations...");
         }
     }
 }

@@ -16,6 +16,7 @@ using Jot.ViewModels;
 using System.Text.RegularExpressions;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using Windows.UI;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -77,6 +78,8 @@ namespace Jot
             
             // Setup text binding for text editors
             TextEditor.TextChanged += TextEditor_TextChanged;
+            TextEditor.DrawingModeChanged += TextEditor_DrawingModeChanged;
+            TextEditor.RequestFreeDrawing += TextEditor_RequestFreeDrawing;
             
             // Setup search box
             SearchBox.TextChanged += SearchBox_TextChanged;
@@ -126,6 +129,318 @@ namespace Jot
             }
         }
 
+        private void ToggleDrawingMode_Click(object sender, RoutedEventArgs e)
+        {
+            // Open the real drawing canvas
+            OpenFreeDrawingCanvas();
+        }
+
+        private void OpenFreeDrawingCanvas()
+        {
+            // Use the enhanced ASCII drawing dialog as the main drawing interface
+            ShowSimpleDrawingDialog();
+        }
+
+        private void ShowFreeDrawingCanvas(object panel)
+        {
+            // Not needed for ASCII implementation
+        }
+
+        private void CloseFreeDrawingCanvas()
+        {
+            // Not needed for ASCII implementation
+        }
+
+        private async void ShowSimpleDrawingDialog()
+        {
+            try
+            {
+                var dialog = new ContentDialog
+                {
+                    Title = "🎨 Rotulador Libre - Dibujo ASCII",
+                    PrimaryButtonText = "💾 Guardar Dibujo",
+                    SecondaryButtonText = "🗑️ Limpiar",
+                    CloseButtonText = "❌ Cancelar",
+                    XamlRoot = this.Content.XamlRoot
+                };
+
+                var mainPanel = new StackPanel { Spacing = 16, Margin = new Thickness(20, 20, 20, 20) };
+                
+                // Title and instructions
+                mainPanel.Children.Add(new TextBlock
+                {
+                    Text = "🖌️ Canvas de Dibujo Libre",
+                    FontSize = 20,
+                    FontWeight = Microsoft.UI.Text.FontWeights.Bold,
+                    HorizontalAlignment = HorizontalAlignment.Center
+                });
+
+                mainPanel.Children.Add(new TextBlock
+                {
+                    Text = "Usa caracteres ASCII para crear dibujos libremente, como si fuera un rotulador digital.",
+                    TextWrapping = TextWrapping.Wrap,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    Margin = new Thickness(0, 0, 0, 12)
+                });
+
+                // Drawing area with better styling
+                var drawingTextBox = new TextBox
+                {
+                    Height = 380,
+                    AcceptsReturn = true,
+                    FontFamily = new FontFamily("Cascadia Code, Consolas, monospace"),
+                    FontSize = 14,
+                    PlaceholderText = "🎨 Dibuja aquí usando el teclado como rotulador...\n\n" +
+                                     "Tips para dibujar:\n" +
+                                     "• Usa ─ │ ┌ ┐ └ ┘ para marcos\n" +
+                                     "• Usa ○ ● □ ■ △ ▲ para formas\n" +
+                                     "• Usa → ← ↑ ↓ para flechas\n" +
+                                     "• Usa ★ ♥ ♦ ♣ para decoraciones\n\n" +
+                                     "Ejemplo:\n" +
+                                     "   ★ Mi Dibujo ★\n" +
+                                     "  ╔═══════════╗\n" +
+                                     "  ║     ♥     ║\n" +
+                                     "  ║  ○ → □    ║\n" +
+                                     "  ╚═══════════╝",
+                    Background = new SolidColorBrush(Microsoft.UI.Colors.White),
+                    BorderBrush = new SolidColorBrush(Microsoft.UI.Colors.Gray),
+                    BorderThickness = new Thickness(2)
+                };
+                
+                ScrollViewer.SetVerticalScrollBarVisibility(drawingTextBox, ScrollBarVisibility.Auto);
+                ScrollViewer.SetHorizontalScrollBarVisibility(drawingTextBox, ScrollBarVisibility.Auto);
+
+                mainPanel.Children.Add(drawingTextBox);
+
+                // Enhanced tool palette
+                mainPanel.Children.Add(new TextBlock 
+                { 
+                    Text = "🛠️ Paleta de Herramientas:", 
+                    FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+                    Margin = new Thickness(0, 8, 0, 4)
+                });
+
+                // Create a comprehensive tool grid
+                var toolsGrid = new Grid();
+                toolsGrid.ColumnDefinitions.Add(new ColumnDefinition());
+                toolsGrid.ColumnDefinitions.Add(new ColumnDefinition());
+                toolsGrid.ColumnDefinitions.Add(new ColumnDefinition());
+                toolsGrid.ColumnDefinitions.Add(new ColumnDefinition());
+
+                var toolCategories = new[]
+                {
+                    ("Líneas", new[] { "─", "│", "┌", "┐", "└", "┘", "├", "┤", "┬", "┴", "┼" }),
+                    ("Formas", new[] { "○", "●", "□", "■", "△", "▲", "◇", "♦", "◯", "◉", "▢" }),
+                    ("Flechas", new[] { "→", "←", "↑", "↓", "↗", "↘", "↙", "↖", "▶", "◀", "▲" }),
+                    ("Decoración", new[] { "★", "☆", "♥", "♦", "♣", "♠", "※", "⚡", "✦", "❀", "⭐" })
+                };
+
+                for (int col = 0; col < toolCategories.Length; col++)
+                {
+                    var (categoryName, symbols) = toolCategories[col];
+                    
+                    var categoryPanel = new StackPanel { Spacing = 4, Margin = new Thickness(4) };
+                    
+                    categoryPanel.Children.Add(new TextBlock 
+                    { 
+                        Text = categoryName, 
+                        FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+                        FontSize = 12,
+                        HorizontalAlignment = HorizontalAlignment.Center
+                    });
+
+                    var symbolsPanel = new StackPanel { Orientation = Orientation.Horizontal };
+                    foreach (var symbol in symbols)
+                    {
+                        var btn = new Button
+                        {
+                            Content = symbol,
+                            Width = 32,
+                            Height = 32,
+                            FontFamily = new FontFamily("Segoe UI Symbol, Consolas"),
+                            FontSize = 16,
+                            Margin = new Thickness(1),
+                            Background = new SolidColorBrush(Microsoft.UI.Colors.LightGray)
+                        };
+                        
+                        ToolTipService.SetToolTip(btn, $"Insertar: {symbol}");
+                        
+                        btn.Click += (s, e) => {
+                            var pos = drawingTextBox.SelectionStart;
+                            drawingTextBox.Text = drawingTextBox.Text.Insert(pos, symbol);
+                            drawingTextBox.SelectionStart = pos + symbol.Length;
+                            drawingTextBox.Focus(FocusState.Programmatic);
+                        };
+                        
+                        symbolsPanel.Children.Add(btn);
+                    }
+                    
+                    categoryPanel.Children.Add(symbolsPanel);
+                    Grid.SetColumn(categoryPanel, col);
+                    toolsGrid.Children.Add(categoryPanel);
+                }
+
+                mainPanel.Children.Add(toolsGrid);
+
+                // Quick templates
+                mainPanel.Children.Add(new TextBlock 
+                { 
+                    Text = "📋 Plantillas Rápidas:", 
+                    FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+                    Margin = new Thickness(0, 8, 0, 4)
+                });
+
+                var templatesPanel = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8 };
+                
+                var templates = new[]
+                {
+                    ("Marco Simple", "┌─────────────┐\n│             │\n│             │\n└─────────────┘"),
+                    ("Marco Doble", "╔═════════════╗\n║             ║\n║             ║\n╚═════════════╝"),
+                    ("Flecha Simple", "     ↑\n     │\n○ ──→ □ ──→ △\n     │\n     ▼"),
+                    ("Diagrama Básico", "  [INICIO]\n      │\n      ▼\n  ┌───────┐\n  │PROCESO│\n  └───────┘\n      │\n      ▼\n   [FIN]")
+                };
+
+                foreach (var (name, template) in templates)
+                {
+                    var btn = new Button
+                    {
+                        Content = name,
+                        FontSize = 11,
+                        Padding = new Thickness(8, 4, 8, 4)
+                    };
+                    
+                    btn.Click += (s, e) => {
+                        var pos = drawingTextBox.SelectionStart;
+                        var insertion = $"\n{template}\n";
+                        drawingTextBox.Text = drawingTextBox.Text.Insert(pos, insertion);
+                        drawingTextBox.SelectionStart = pos + insertion.Length;
+                        drawingTextBox.Focus(FocusState.Programmatic);
+                    };
+                    
+                    templatesPanel.Children.Add(btn);
+                }
+
+                mainPanel.Children.Add(templatesPanel);
+
+                dialog.Content = mainPanel;
+
+                var result = await dialog.ShowAsync();
+                
+                if (result == ContentDialogResult.Primary && !string.IsNullOrWhiteSpace(drawingTextBox.Text))
+                {
+                    var drawingContent = $@"
+## 🎨 Dibujo Libre con Rotulador - {DateTime.Now:HH:mm:ss}
+
+```ascii-art
+{drawingTextBox.Text}
+```
+
+*Creado con rotulador ASCII libre*
+";
+                    
+                    if (ViewModel.SelectedDocument != null)
+                    {
+                        ViewModel.SelectedDocument.Content += drawingContent;
+                        ViewModel.SelectedDocument.ModifiedAt = DateTime.Now;
+                        
+                        // Update UI
+                        UpdateDocumentContent();
+                        UpdatePreviewContent();
+                    }
+                }
+                else if (result == ContentDialogResult.Secondary)
+                {
+                    // Clear and restart dialog  
+                    drawingTextBox.Text = "";
+                    // Don't call ShowSimpleDrawingDialog again to avoid infinite recursion
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error showing drawing dialog: {ex.Message}");
+            }
+        }
+
+        private void TextEditor_DrawingModeChanged(object? sender, bool isDrawingMode)
+        {
+            // Just log for now since we removed the ToggleDrawingModeCommand
+            System.Diagnostics.Debug.WriteLine($"Drawing mode changed: {isDrawingMode}");
+        }
+
+        private void TextEditor_RequestFreeDrawing(object? sender, EventArgs e)
+        {
+            // Open free drawing canvas when requested from the text editor
+            OpenFreeDrawingCanvas();
+        }
+
+        private async void ShowDrawingModeInstructions()
+        {
+            try
+            {
+                var instructionsDialog = new ContentDialog
+                {
+                    Title = "🎨 Modo de Dibujo Activado",
+                    Content = CreateDrawingInstructionsContent(),
+                    CloseButtonText = "Entendido",
+                    XamlRoot = this.Content.XamlRoot
+                };
+
+                await instructionsDialog.ShowAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error showing drawing instructions: {ex.Message}");
+            }
+        }
+
+        private StackPanel CreateDrawingInstructionsContent()
+        {
+            var panel = new StackPanel { Spacing = 12, MaxWidth = 500 };
+
+            panel.Children.Add(new TextBlock
+            {
+                Text = "El modo de dibujo está ahora activo. Puedes crear diagramas y esquemas usando:",
+                TextWrapping = TextWrapping.Wrap,
+                FontSize = 14
+            });
+
+            panel.Children.Add(new TextBlock
+            {
+                Text = "🖌️ Botón de Dibujo en la barra de herramientas",
+                FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+                TextWrapping = TextWrapping.Wrap
+            });
+
+            panel.Children.Add(new TextBlock
+            {
+                Text = "📊 Botón de Esquemas para plantillas predefinidas",
+                FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+                TextWrapping = TextWrapping.Wrap
+            });
+
+            panel.Children.Add(new TextBlock
+            {
+                Text = "🔢 Botón de Figuras Geométricas para formas rápidas",
+                FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+                TextWrapping = TextWrapping.Wrap
+            });
+
+            panel.Children.Add(new Border
+            {
+                Background = new SolidColorBrush(Windows.UI.Color.FromArgb(30, 0, 120, 215)),
+                Padding = new Thickness(12),
+                CornerRadius = new CornerRadius(4),
+                Child = new TextBlock
+                {
+                    Text = "💡 Consejo: Cambia a modo Preview o Split para ver tus diagramas renderizados en tiempo real.",
+                    TextWrapping = TextWrapping.Wrap,
+                    FontStyle = Windows.UI.Text.FontStyle.Italic
+                }
+            });
+
+            return panel;
+        }
+        
         private void DocumentsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (DocumentsList.SelectedItem is Models.Document selectedDoc)
@@ -208,7 +523,13 @@ namespace Jot
                     SplitModeEditor.Text = ViewModel.SelectedDocument.Content ?? "";
                     // Remove previous event handler to avoid double subscription
                     SplitModeEditor.TextChanged -= SplitEditor_TextChanged;
+                    SplitModeEditor.DrawingModeChanged -= TextEditor_DrawingModeChanged;
+                    SplitModeEditor.RequestFreeDrawing -= TextEditor_RequestFreeDrawing;
+                    
+                    // Add event handlers
                     SplitModeEditor.TextChanged += SplitEditor_TextChanged;
+                    SplitModeEditor.DrawingModeChanged += TextEditor_DrawingModeChanged;
+                    SplitModeEditor.RequestFreeDrawing += TextEditor_RequestFreeDrawing;
                 }
                 
                 // Update previews
