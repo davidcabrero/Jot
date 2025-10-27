@@ -462,14 +462,15 @@ namespace Jot
                 ViewModel.SelectedDocument.Content = newText;
                 ViewModel.SelectedDocument.ModifiedAt = DateTime.Now;
                 
-                // Update the split mode editor and preview
-                UpdateSplitModeContent();
-                UpdatePreviewContent();
+                // 🚀 ACTUALIZACIÓN INSTANTÁNEA - Sin demoras
+                // Actualizar inmediatamente ambos previews
+                UpdatePreviewContentImmediate(newText);
                 
-                // Update document index immediately when content changes
+                // Actualizar split mode editor inmediatamente
+                UpdateSplitModeContentImmediate(newText);
+                
+                // Actualizar índice de documento inmediatamente
                 UpdateDocumentIndex();
-                
-                // Auto-save after a short delay (could be implemented with a timer)
             }
         }
 
@@ -560,12 +561,13 @@ namespace Jot
                 ViewModel.SelectedDocument.Content = newText;
                 ViewModel.SelectedDocument.ModifiedAt = DateTime.Now;
                 
-                // Update the main editor and preview
+                // 🚀 ACTUALIZACIÓN INSTANTÁNEA DESDE SPLIT EDITOR
                 _isUpdatingContent = true;
                 TextEditor.Text = newText;
                 _isUpdatingContent = false;
                 
-                UpdatePreviewContent();
+                // Actualizar preview inmediatamente
+                UpdatePreviewContentImmediate(newText);
                 UpdateDocumentIndex();
             }
         }
@@ -573,24 +575,48 @@ namespace Jot
         private void UpdatePreviewContent()
         {
             var content = ViewModel.SelectedDocument?.Content ?? "";
+            UpdatePreviewContentImmediate(content);
+        }
+
+        private void UpdatePreviewContentImmediate(string content)
+        {
+            // 🚀 ACTUALIZACIÓN INSTANTÁNEA DE PREVIEW
+            // Actualizar main preview inmediatamente
+            if (MarkdownPreview != null)
+            {
+                MarkdownPreview.MarkdownText = content;
+            }
             
-            // Update main preview
-            MarkdownPreview.MarkdownText = content;
-            
-            // Update split mode preview specifically
+            // Actualizar split mode preview inmediatamente
             if (SplitModePreview != null)
             {
                 SplitModePreview.MarkdownText = content;
             }
             
-            System.Diagnostics.Debug.WriteLine($"Updated preview content: {content.Length} characters");
+            System.Diagnostics.Debug.WriteLine($"🔄 Preview actualizado instantáneamente: {content.Length} caracteres");
         }
 
         private void UpdateSplitModeContent()
         {
-            if (SplitModePreview != null && ViewModel.SelectedDocument != null)
+            if (ViewModel.SelectedDocument != null)
             {
-                SplitModePreview.MarkdownText = ViewModel.SelectedDocument.Content ?? "";
+                UpdateSplitModeContentImmediate(ViewModel.SelectedDocument.Content ?? "");
+            }
+        }
+
+        private void UpdateSplitModeContentImmediate(string content)
+        {
+            // 🚀 ACTUALIZACIÓN INSTANTÁNEA DE SPLIT MODE
+            if (SplitModeEditor != null && !_isUpdatingContent)
+            {
+                _isUpdatingContent = true;
+                SplitModeEditor.Text = content;
+                _isUpdatingContent = false;
+            }
+            
+            if (SplitModePreview != null)
+            {
+                SplitModePreview.MarkdownText = content;
             }
         }
 

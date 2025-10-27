@@ -41,7 +41,26 @@ namespace Jot.Controls
         {
             if (d is MarkdownPreview preview && e.NewValue is string markdownText)
             {
-                preview.RenderMarkdown(markdownText);
+                // 🚀 RENDERIZADO INSTANTÁNEO - Sin demoras
+                preview.RenderMarkdownImmediately(markdownText);
+            }
+        }
+
+        private void RenderMarkdownImmediately(string markdown)
+        {
+            try
+            {
+                // Usar Dispatcher.BeginInvoke para asegurar actualización inmediata en UI thread
+                this.DispatcherQueue.TryEnqueue(() =>
+                {
+                    RenderMarkdown(markdown);
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error in immediate rendering: {ex.Message}");
+                // Fallback al método normal
+                RenderMarkdown(markdown);
             }
         }
 
@@ -155,15 +174,60 @@ namespace Jot.Controls
                     {
                         quizContent.Add(line);
                         
-                        // Check if we've reached the end of the quiz (empty line after answer details)
+                        // 🔧 MEJORA: Detectar fin de quiz de manera más flexible
+                        // Terminar quiz si encontramos:
+                        // 1. Línea vacía después de </details>
+                        // 2. Nueva sección/header
+                        // 3. Otro tipo de contenido que no pertenece al quiz
+                        
+                        bool shouldEndQuiz = false;
+                        
+                        // Caso 1: Línea vacía después de </details>
                         if (string.IsNullOrEmpty(trimmedLine) && 
-                            quizContent.Count > 5 && 
-                            quizContent[quizContent.Count - 2].Trim().StartsWith("</details>"))
+                            quizContent.Count > 3 && 
+                            quizContent.Any(q => q.Trim().StartsWith("</details>")))
+                        {
+                            shouldEndQuiz = true;
+                        }
+                        
+                        // Caso 2: Nueva sección o header
+                        if (trimmedLine.StartsWith("#") && quizContent.Count > 3)
+                        {
+                            // Es un nuevo header, finalizar el quiz actual y procesar esta línea después
+                            shouldEndQuiz = true;
+                            quizContent.RemoveAt(quizContent.Count - 1); // No incluir esta línea en el quiz
+                            i--; // Retroceder para procesar esta línea en la siguiente iteración
+                        }
+                        
+                        // Caso 3: Cualquier contenido que claramente no es parte del quiz
+                        if (quizContent.Count > 5 && 
+                            !string.IsNullOrEmpty(trimmedLine) &&
+                            !trimmedLine.StartsWith("A)") && 
+                            !trimmedLine.StartsWith("B)") && 
+                            !trimmedLine.StartsWith("C)") && 
+                            !trimmedLine.StartsWith("D)") &&
+                            !trimmedLine.StartsWith("Correct answer:") &&
+                            !trimmedLine.StartsWith("Explanation:") &&
+                            !trimmedLine.StartsWith("<details>") &&
+                            !trimmedLine.StartsWith("<summary>") &&
+                            !trimmedLine.StartsWith("</details>") &&
+                            !trimmedLine.StartsWith("</summary>") &&
+                            !trimmedLine.Contains("Quiz") &&
+                            !trimmedLine.StartsWith("**Question:**"))
+                        {
+                            // Este contenido no parece pertenecer al quiz
+                            shouldEndQuiz = true;
+                            quizContent.RemoveAt(quizContent.Count - 1); // No incluir esta línea en el quiz
+                            i--; // Retroceder para procesar esta línea en la siguiente iteración
+                        }
+                        
+                        if (shouldEndQuiz)
                         {
                             inQuizBlock = false;
                             AddQuizBlock(string.Join("\n", quizContent));
                             quizContent.Clear();
                         }
+                        
                         continue;
                     }
                     
@@ -249,8 +313,8 @@ namespace Jot.Controls
                         }
                     }
                     
-                    // Check for math formulas
-                    if (trimmedLine.StartsWith("$$") || trimmedLine.Contains("$$"))
+                    // Check for math formulas - MEJORADO para detectar $ y $$
+                    if (IsMathFormula(trimmedLine))
                     {
                         var mathContent = ExtractMathContent(lines, ref i);
                         AddMathFormula(mathContent);
@@ -1219,34 +1283,115 @@ namespace Jot.Controls
             return tableLines;
         }
 
+        private bool IsMathFormula(string line)
+        {
+            var trimmed = line.Trim();
+            
+            // Detectar fórmulas con $$...$$
+            if (trimmed.StartsWith("$$") || trimmed.Contains("$$"))
+                return true;
+            
+            // Detectar fórmulas con $...$ (inline math)
+            if (trimmed.StartsWith("$") && !trimmed.StartsWith("$$"))
+            {
+                // Verificar que la línea termine con $ y tenga contenido LaTeX
+                if (trimmed.EndsWith("$") && trimmed.Length > 2)
+                    return true;
+                
+                // O que contenga comandos LaTeX típicos
+                if (ContainsLatexCommands(trimmed))
+                    return true;
+            }
+            
+            return false;
+        }
+
+        private bool ContainsLatexCommands(string text)
+        {
+            // Lista de comandos LaTeX comunes
+            var latexCommands = new[]
+            {
+                "\\frac", "\\sqrt", "\\int", "\\sum", "\\prod", "\\lim",
+                "\\alpha", "\\beta", "\\gamma", "\\delta", "\\theta", "\\pi", "\\omega",
+                "\\leq", "\\geq", "\\neq", "\\approx", "\\pm", "\\times", "\\div",
+                "\\sin", "\\cos", "\\tan", "\\log", "\\ln", "\\exp",
+                "\\begin{", "\\end{", "\\left", "\\right"
+            };
+            
+            return latexCommands.Any(cmd => text.Contains(cmd));
+        }
         private string ExtractMathContent(string[] lines, ref int currentIndex)
         {
             var mathContent = new StringBuilder();
             var line = lines[currentIndex];
+            var trimmed = line.Trim();
             
-            if (line.Trim().StartsWith("$$") && line.Trim().EndsWith("$$") && line.Trim().Length > 4)
+            // 🧮 DETECCIÓN MEJORADA DE FÓRMULAS MATEMÁTICAS
+            
+            // Caso 1: Fórmula de una línea con $$...$$
+            if (trimmed.StartsWith("$$") && trimmed.EndsWith("$$") && trimmed.Length > 4)
             {
-                // Single line math
-                return line.Trim();
+                return trimmed;
             }
             
-            // Multi-line math
-            mathContent.AppendLine(line);
-            currentIndex++;
-            
-            while (currentIndex < lines.Length)
+            // Caso 2: Fórmula de una línea con $...$
+            if (trimmed.StartsWith("$") && trimmed.EndsWith("$") && !trimmed.StartsWith("$$") && trimmed.Length > 2)
             {
-                line = lines[currentIndex];
+                // Convertir formato $ a $$ para procesamiento uniforme
+                var content = trimmed.Substring(1, trimmed.Length - 2);
+                return "$$" + content + "$$";
+            }
+            
+            // Caso 3: Fórmula multilínea que empieza con $$
+            if (trimmed.StartsWith("$$"))
+            {
                 mathContent.AppendLine(line);
-                
-                if (line.Trim().EndsWith("$$"))
-                {
-                    break;
-                }
                 currentIndex++;
+                
+                while (currentIndex < lines.Length)
+                {
+                    line = lines[currentIndex];
+                    mathContent.AppendLine(line);
+                    
+                    if (line.Trim().EndsWith("$$"))
+                    {
+                        break;
+                    }
+                    currentIndex++;
+                }
+                
+                return mathContent.ToString();
             }
             
-            return mathContent.ToString();
+            // Caso 4: Fórmula que empieza con $ (sin terminar en la misma línea)
+            if (trimmed.StartsWith("$") && !trimmed.EndsWith("$"))
+            {
+                var content = new StringBuilder(trimmed.Substring(1)); // Quitar el $ inicial
+                currentIndex++;
+                
+                while (currentIndex < lines.Length)
+                {
+                    line = lines[currentIndex];
+                    if (line.Trim().EndsWith("$"))
+                    {
+                        // Última línea de la fórmula
+                        var lastLine = line.Trim();
+                        content.Append(" " + lastLine.Substring(0, lastLine.Length - 1)); // Quitar $ final
+                        break;
+                    }
+                    else
+                    {
+                        content.Append(" " + line.Trim());
+                    }
+                    currentIndex++;
+                }
+                
+                // Convertir a formato $$ para procesamiento uniforme
+                return "$$" + content.ToString().Trim() + "$$";
+            }
+            
+            // Fallback: devolver la línea original
+            return line.Trim();
         }
 
         private void AddTable(List<string> tableLines)
@@ -1349,87 +1494,475 @@ namespace Jot.Controls
         {
             var border = new Border
             {
-                Background = new SolidColorBrush(Color.FromArgb(20, 100, 149, 237)),
-                BorderBrush = new SolidColorBrush(Color.FromArgb(100, 100, 149, 237)),
+                Background = new SolidColorBrush(Color.FromArgb(30, 240, 248, 255)), // Light blue background
+                BorderBrush = new SolidColorBrush(Color.FromArgb(120, 100, 149, 237)),
                 BorderThickness = new Thickness(1),
-                CornerRadius = new CornerRadius(6),
-                Padding = new Thickness(16, 12, 16, 12),
-                Margin = new Thickness(0, 12, 0, 12),
-                HorizontalAlignment = HorizontalAlignment.Center
+                CornerRadius = new CornerRadius(8),
+                Padding = new Thickness(20, 16, 20, 16),
+                Margin = new Thickness(0, 16, 0, 16),
+                HorizontalAlignment = HorizontalAlignment.Stretch
             };
 
             var stackPanel = new StackPanel
             {
-                HorizontalAlignment = HorizontalAlignment.Center
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Spacing = 12
             };
 
-            // Math icon
+            // Math icon and title
+            var titlePanel = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Spacing = 8
+            };
+
             var mathIcon = new FontIcon
             {
                 Glyph = "\uE8EF", // Calculator icon
-                FontSize = 20,
-                Foreground = new SolidColorBrush(Color.FromArgb(255, 100, 149, 237)),
-                HorizontalAlignment = HorizontalAlignment.Center,
-                Margin = new Thickness(0, 0, 0, 8)
+                FontSize = 18,
+                Foreground = new SolidColorBrush(Color.FromArgb(255, 100, 149, 237))
             };
-            stackPanel.Children.Add(mathIcon);
+            titlePanel.Children.Add(mathIcon);
 
-            // Process and clean the formula text
-            var formulaText = ProcessMathFormula(mathContent);
-            var textBlock = new TextBlock
+            var titleText = new TextBlock
             {
-                Text = formulaText,
-                FontFamily = new FontFamily("Cambria Math, Times New Roman, serif"),
+                Text = "Mathematical Formula",
                 FontSize = 14,
-                TextAlignment = TextAlignment.Center,
-                TextWrapping = TextWrapping.Wrap,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                LineHeight = 20,
-                IsTextSelectionEnabled = true
+                FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+                Foreground = new SolidColorBrush(Color.FromArgb(255, 100, 149, 237))
             };
-            stackPanel.Children.Add(textBlock);
+            titlePanel.Children.Add(titleText);
+            stackPanel.Children.Add(titlePanel);
 
-            // Add note
-            var noteBlock = new TextBlock
+            // Process and display the formula
+            var formulaText = ProcessMathFormula(mathContent);
+            
+            // Create a rich text display for the formula
+            var formulaPanel = CreateFormulaDisplay(formulaText, mathContent);
+            stackPanel.Children.Add(formulaPanel);
+
+            // Show raw LaTeX in expandable section
+            var rawLatexExpander = new Expander
             {
-                Text = "📐 Mathematical Formula (LaTeX)",
-                FontSize = 12,
-                Opacity = 0.7,
-                HorizontalAlignment = HorizontalAlignment.Center,
+                Header = "View LaTeX Source",
+                HorizontalAlignment = HorizontalAlignment.Stretch,
                 Margin = new Thickness(0, 8, 0, 0)
             };
-            stackPanel.Children.Add(noteBlock);
+
+            var rawLatexBlock = new TextBlock
+            {
+                Text = mathContent.Trim(),
+                FontFamily = new FontFamily("Consolas, Courier New, monospace"),
+                FontSize = 12,
+                TextWrapping = TextWrapping.Wrap,
+                IsTextSelectionEnabled = true
+            };
+
+            var rawLatexContainer = new Border
+            {
+                Background = new SolidColorBrush(Color.FromArgb(20, 0, 0, 0)),
+                Padding = new Thickness(12, 8, 12, 8),
+                CornerRadius = new CornerRadius(4),
+                Child = rawLatexBlock
+            };
+            
+            rawLatexExpander.Content = rawLatexContainer;
+            stackPanel.Children.Add(rawLatexExpander);
 
             border.Child = stackPanel;
             ContentPanel.Children.Add(border);
         }
 
+        private FrameworkElement CreateFormulaDisplay(string processedFormula, string originalLatex)
+        {
+            var formulaContainer = new Border
+            {
+                Background = new SolidColorBrush(Color.FromArgb(40, 255, 255, 255)),
+                BorderBrush = new SolidColorBrush(Color.FromArgb(60, 100, 149, 237)),
+                BorderThickness = new Thickness(1),
+                CornerRadius = new CornerRadius(4),
+                Padding = new Thickness(16, 12, 16, 12),
+                HorizontalAlignment = HorizontalAlignment.Center
+            };
+
+            // Try to detect formula type and create appropriate display
+            var formulaType = DetectFormulaType(originalLatex);
+            
+            switch (formulaType)
+            {
+                case "equation":
+                    formulaContainer.Child = CreateEquationDisplay(processedFormula);
+                    break;
+                case "fraction":
+                    formulaContainer.Child = CreateFractionDisplay(processedFormula, originalLatex);
+                    break;
+                case "integral":
+                    formulaContainer.Child = CreateIntegralDisplay(processedFormula);
+                    break;
+                case "matrix":
+                    formulaContainer.Child = CreateMatrixDisplay(processedFormula, originalLatex);
+                    break;
+                case "sum":
+                    formulaContainer.Child = CreateSumDisplay(processedFormula);
+                    break;
+                default:
+                    formulaContainer.Child = CreateGeneralFormulaDisplay(processedFormula);
+                    break;
+            }
+
+            return formulaContainer;
+        }
+
+        private string DetectFormulaType(string latex)
+        {
+            var content = latex.ToLower();
+            
+            if (content.Contains("\\frac") || content.Contains("over"))
+                return "fraction";
+            else if (content.Contains("\\int") || content.Contains("integral"))
+                return "integral";
+            else if (content.Contains("\\sum") || content.Contains("\\sigma"))
+                return "sum";
+            else if (content.Contains("\\begin{matrix") || content.Contains("\\begin{pmatrix"))
+                return "matrix";
+            else if (content.Contains("=") || content.Contains("\\eq"))
+                return "equation";
+            else
+                return "general";
+        }
+
+        private StackPanel CreateEquationDisplay(string formula)
+        {
+            var panel = new StackPanel
+            {
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Spacing = 4
+            };
+
+            var equationBlock = new TextBlock
+            {
+                Text = formula,
+                FontFamily = new FontFamily("Cambria Math, Times New Roman, serif"),
+                FontSize = 18,
+                TextAlignment = TextAlignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                FontWeight = Microsoft.UI.Text.FontWeights.Normal
+            };
+
+            panel.Children.Add(equationBlock);
+            return panel;
+        }
+
+        private StackPanel CreateFractionDisplay(string formula, string latex)
+        {
+            var panel = new StackPanel
+            {
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Spacing = 2
+            };
+
+            // Try to extract numerator and denominator
+            var fractionMatch = Regex.Match(latex, @"\\frac\{([^}]+)\}\{([^}]+)\}");
+            if (fractionMatch.Success)
+            {
+                var numerator = ProcessMathFormula(fractionMatch.Groups[1].Value);
+                var denominator = ProcessMathFormula(fractionMatch.Groups[2].Value);
+
+                var numeratorBlock = new TextBlock
+                {
+                    Text = numerator,
+                    FontFamily = new FontFamily("Cambria Math, Times New Roman, serif"),
+                    FontSize = 16,
+                    TextAlignment = TextAlignment.Center,
+                    HorizontalAlignment = HorizontalAlignment.Center
+                };
+
+                var fractionLine = new Border
+                {
+                    Height = 1,
+                    Background = new SolidColorBrush(Color.FromArgb(255, 0, 0, 0)),
+                    Margin = new Thickness(8, 2, 8, 2),
+                    MinWidth = 40
+                };
+
+                var denominatorBlock = new TextBlock
+                {
+                    Text = denominator,
+                    FontFamily = new FontFamily("Cambria Math, Times New Roman, serif"),
+                    FontSize = 16,
+                    TextAlignment = TextAlignment.Center,
+                    HorizontalAlignment = HorizontalAlignment.Center
+                };
+
+                panel.Children.Add(numeratorBlock);
+                panel.Children.Add(fractionLine);
+                panel.Children.Add(denominatorBlock);
+            }
+            else
+            {
+                // Fallback to general display
+                return CreateGeneralFormulaDisplay(formula);
+            }
+
+            return panel;
+        }
+
+        private StackPanel CreateIntegralDisplay(string formula)
+        {
+            var panel = new StackPanel
+            {
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Spacing = 4
+            };
+
+            var integralBlock = new TextBlock
+            {
+                Text = "∫ " + formula.Replace("∫", "").Trim(),
+                FontFamily = new FontFamily("Cambria Math, Times New Roman, serif"),
+                FontSize = 20,
+                TextAlignment = TextAlignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Center
+            };
+
+            panel.Children.Add(integralBlock);
+            return panel;
+        }
+
+        private StackPanel CreateSumDisplay(string formula)
+        {
+            var panel = new StackPanel
+            {
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Spacing = 4
+            };
+
+            var sumBlock = new TextBlock
+            {
+                Text = "∑ " + formula.Replace("∑", "").Trim(),
+                FontFamily = new FontFamily("Cambria Math, Times New Roman, serif"),
+                FontSize = 20,
+                TextAlignment = TextAlignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Center
+            };
+
+            panel.Children.Add(sumBlock);
+            return panel;
+        }
+
+        private Grid CreateMatrixDisplay(string formula, string latex)
+        {
+            var grid = new Grid();
+            
+            // Simple matrix display - can be enhanced
+            var matrixBlock = new TextBlock
+            {
+                Text = "📊 Matrix\n" + formula,
+                FontFamily = new FontFamily("Cambria Math, Times New Roman, serif"),
+                FontSize = 14,
+                TextAlignment = TextAlignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                TextWrapping = TextWrapping.Wrap
+            };
+
+            grid.Children.Add(matrixBlock);
+            return grid;
+        }
+
+        private StackPanel CreateGeneralFormulaDisplay(string formula)
+        {
+            var panel = new StackPanel
+            {
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Spacing = 4
+            };
+
+            var formulaBlock = new TextBlock
+            {
+                Text = formula,
+                FontFamily = new FontFamily("Cambria Math, Times New Roman, serif"),
+                FontSize = 16,
+                TextAlignment = TextAlignment.Center,
+                TextWrapping = TextWrapping.Wrap,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                LineHeight = 22,
+                IsTextSelectionEnabled = true
+            };
+
+            panel.Children.Add(formulaBlock);
+            return panel;
+        }
+
         private string ProcessMathFormula(string mathContent)
         {
-            // Clean up the LaTeX code for better readability
+            // Enhanced LaTeX to Unicode conversion
             var processed = mathContent.Replace("$$", "").Trim();
             
-            // Replace common LaTeX commands with more readable text
+            // Remove LaTeX environments
             processed = processed.Replace("\\begin{align}", "");
             processed = processed.Replace("\\end{align}", "");
+            processed = processed.Replace("\\begin{equation}", "");
+            processed = processed.Replace("\\end{equation}", "");
+            processed = processed.Replace("\\begin{gather}", "");
+            processed = processed.Replace("\\end{gather}", "");
+            
+            // Line breaks and alignment
             processed = processed.Replace("\\\\", "\n");
             processed = processed.Replace("&=", " = ");
+            processed = processed.Replace("&", " ");
+            
+            // Greek letters
+            processed = processed.Replace("\\alpha", "α");
+            processed = processed.Replace("\\beta", "β");
+            processed = processed.Replace("\\gamma", "γ");
+            processed = processed.Replace("\\delta", "δ");
+            processed = processed.Replace("\\epsilon", "ε");
+            processed = processed.Replace("\\zeta", "ζ");
+            processed = processed.Replace("\\eta", "η");
+            processed = processed.Replace("\\theta", "θ");
+            processed = processed.Replace("\\iota", "ι");
+            processed = processed.Replace("\\kappa", "κ");
+            processed = processed.Replace("\\lambda", "λ");
+            processed = processed.Replace("\\mu", "μ");
+            processed = processed.Replace("\\nu", "ν");
+            processed = processed.Replace("\\xi", "ξ");
+            processed = processed.Replace("\\pi", "π");
+            processed = processed.Replace("\\rho", "ρ");
+            processed = processed.Replace("\\sigma", "σ");
+            processed = processed.Replace("\\tau", "τ");
+            processed = processed.Replace("\\upsilon", "υ");
+            processed = processed.Replace("\\phi", "φ");
+            processed = processed.Replace("\\chi", "χ");
+            processed = processed.Replace("\\psi", "ψ");
+            processed = processed.Replace("\\omega", "ω");
+            
+            // Capital Greek letters
+            processed = processed.Replace("\\Gamma", "Γ");
+            processed = processed.Replace("\\Delta", "Δ");
+            processed = processed.Replace("\\Theta", "Θ");
+            processed = processed.Replace("\\Lambda", "Λ");
+            processed = processed.Replace("\\Xi", "Ξ");
+            processed = processed.Replace("\\Pi", "Π");
+            processed = processed.Replace("\\Sigma", "Σ");
+            processed = processed.Replace("\\Phi", "Φ");
+            processed = processed.Replace("\\Psi", "Ψ");
+            processed = processed.Replace("\\Omega", "Ω");
+            
+            // Mathematical operators
             processed = processed.Replace("\\pm", "±");
+            processed = processed.Replace("\\mp", "∓");
+            processed = processed.Replace("\\times", "×");
+            processed = processed.Replace("\\div", "÷");
+            processed = processed.Replace("\\cdot", "·");
+            processed = processed.Replace("\\ast", "∗");
+            processed = processed.Replace("\\star", "⋆");
+            processed = processed.Replace("\\circ", "∘");
+            processed = processed.Replace("\\bullet", "∙");
+            
+            // Relations
+            processed = processed.Replace("\\leq", "≤");
+            processed = processed.Replace("\\geq", "≥");
+            processed = processed.Replace("\\neq", "≠");
+            processed = processed.Replace("\\approx", "≈");
+            processed = processed.Replace("\\equiv", "≡");
+            processed = processed.Replace("\\sim", "∼");
+            processed = processed.Replace("\\simeq", "≃");
+            processed = processed.Replace("\\cong", "≅");
+            processed = processed.Replace("\\propto", "∝");
+            
+            // Arrows
+            processed = processed.Replace("\\rightarrow", "→");
+            processed = processed.Replace("\\leftarrow", "←");
+            processed = processed.Replace("\\leftrightarrow", "↔");
+            processed = processed.Replace("\\Rightarrow", "⇒");
+            processed = processed.Replace("\\Leftarrow", "⇐");
+            processed = processed.Replace("\\Leftrightarrow", "⇔");
+            
+            // Set theory
+            processed = processed.Replace("\\in", "∈");
+            processed = processed.Replace("\\notin", "∉");
+            processed = processed.Replace("\\subset", "⊂");
+            processed = processed.Replace("\\supset", "⊃");
+            processed = processed.Replace("\\subseteq", "⊆");
+            processed = processed.Replace("\\supseteq", "⊇");
+            processed = processed.Replace("\\cup", "∪");
+            processed = processed.Replace("\\cap", "∩");
+            processed = processed.Replace("\\emptyset", "∅");
+            processed = processed.Replace("\\exists", "∃");
+            processed = processed.Replace("\\forall", "∀");
+            
+            // Calculus
+            processed = processed.Replace("\\int", "∫");
+            processed = processed.Replace("\\iint", "∬");
+            processed = processed.Replace("\\iiint", "∭");
+            processed = processed.Replace("\\oint", "∮");
+            processed = processed.Replace("\\sum", "∑");
+            processed = processed.Replace("\\prod", "∏");
+            processed = processed.Replace("\\partial", "∂");
+            processed = processed.Replace("\\nabla", "∇");
+            processed = processed.Replace("\\infty", "∞");
+            
+            // Roots and powers
             processed = processed.Replace("\\sqrt{", "√(");
-            processed = processed.Replace("\\frac{", "");
-            processed = Regex.Replace(processed, @"}\{", " / (");
-            processed = processed.Replace("}{", ") / (");
+            processed = Regex.Replace(processed, @"\\sqrt\[(\d+)\]\{", m => $"{GetNthRootSymbol(m.Groups[1].Value)}(");
+            
+            // Fractions (simple case)
+            processed = Regex.Replace(processed, @"\\frac\{([^}]+)\}\{([^}]+)\}", m => 
+                $"({ProcessMathFormula(m.Groups[1].Value)}) / ({ProcessMathFormula(m.Groups[2].Value)})");
+            
+            // Subscripts and superscripts
+            processed = processed.Replace("^2", "²");
+            processed = processed.Replace("^3", "³");
+            processed = processed.Replace("^{2}", "²");
+            processed = processed.Replace("^{3}", "³");
+            processed = processed.Replace("^{-1}", "⁻¹");
+            processed = processed.Replace("^{-2}", "⁻²");
+            processed = processed.Replace("^{n}", "ⁿ");
+            processed = processed.Replace("_{n}", "ₙ");
+            processed = processed.Replace("_{i}", "ᵢ");
+            processed = processed.Replace("_{0}", "₀");
+            processed = processed.Replace("_{1}", "₁");
+            processed = processed.Replace("_{2}", "₂");
+            
+            // Clean up brackets
             processed = processed.Replace("{", "(");
             processed = processed.Replace("}", ")");
-            processed = processed.Replace("^2", "²");
-            processed = processed.Replace("^", "^");
             
-            // Clean up extra spaces and line breaks
+            // Matrix notation
+            processed = processed.Replace("\\begin{pmatrix}", "⎡");
+            processed = processed.Replace("\\end{pmatrix}", "⎤");
+            processed = processed.Replace("\\begin{bmatrix}", "[");
+            processed = processed.Replace("\\end{bmatrix}", "]");
+            
+            // Functions
+            processed = processed.Replace("\\sin", "sin");
+            processed = processed.Replace("\\cos", "cos");
+            processed = processed.Replace("\\tan", "tan");
+            processed = processed.Replace("\\log", "log");
+            processed = processed.Replace("\\ln", "ln");
+            processed = processed.Replace("\\exp", "exp");
+            processed = processed.Replace("\\lim", "lim");
+            processed = processed.Replace("\\max", "max");
+            processed = processed.Replace("\\min", "min");
+            
+            // Clean up extra spaces and formatting
             processed = Regex.Replace(processed, @"\s+", " ");
             processed = processed.Replace(" \n ", "\n");
+            processed = processed.Replace("\n ", "\n");
+            processed = processed.Replace(" \n", "\n");
             processed = processed.Trim();
             
             return processed;
+        }
+
+        private string GetNthRootSymbol(string n)
+        {
+            return n switch
+            {
+                "3" => "∛",
+                "4" => "∜",
+                _ => $"{n}√"
+            };
         }
 
         // Annotation Mode Methods

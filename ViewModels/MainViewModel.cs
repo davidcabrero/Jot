@@ -295,22 +295,23 @@ namespace Jot.ViewModels
                 // Save current document first to ensure latest changes are included
                 await SaveCurrentDocument();
                 
-                // Export to PDF
+                System.Diagnostics.Debug.WriteLine("📸 Iniciando exportación PDF con captura de Preview...");
+                
+                // Export to PDF usando captura de Preview
                 var success = await _pdfExportService.ExportDocumentToPdfAsync(SelectedDocument);
                 
                 if (success)
                 {
-                    // Show success notification (you might want to implement a notification service)
-                    System.Diagnostics.Debug.WriteLine($"Successfully exported '{SelectedDocument.Title}' to PDF");
+                    System.Diagnostics.Debug.WriteLine($"✅ Successfully exported '{SelectedDocument.Title}' to PDF with Preview capture");
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine("PDF export was cancelled or failed");
+                    System.Diagnostics.Debug.WriteLine("❌ PDF export was cancelled or failed");
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error exporting to PDF: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"❌ Error exporting to PDF: {ex.Message}");
             }
             finally
             {
@@ -328,21 +329,23 @@ namespace Jot.ViewModels
             {
                 IsExportingPdf = true;
                 
-                // Export the specified document to PDF
+                System.Diagnostics.Debug.WriteLine($"📸 Iniciando exportación PDF con captura para '{document.Title}'...");
+                
+                // Export the specified document to PDF usando captura de Preview
                 var success = await _pdfExportService.ExportDocumentToPdfAsync(document);
                 
                 if (success)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Successfully exported '{document.Title}' to PDF");
+                    System.Diagnostics.Debug.WriteLine($"✅ Successfully exported '{document.Title}' to PDF with Preview capture");
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine("PDF export was cancelled or failed");
+                    System.Diagnostics.Debug.WriteLine("❌ PDF export was cancelled or failed");
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error exporting to PDF: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"❌ Error exporting to PDF: {ex.Message}");
             }
             finally
             {
@@ -574,6 +577,178 @@ namespace Jot.ViewModels
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error opening paint canvas: {ex.Message}");
+            }
+        }
+
+        [RelayCommand]
+        private async Task OpenMathFormulaDialog()
+        {
+            if (SelectedDocument == null)
+                return;
+
+            try
+            {
+                var dialog = new ContentDialog
+                {
+                    Title = "🧮 Mathematical Formula Editor",
+                    PrimaryButtonText = "Insert Formula",
+                    CloseButtonText = "Cancel",
+                    XamlRoot = App.MainWindow?.Content?.XamlRoot
+                };
+
+                // Create the formula editor interface
+                var mainPanel = new StackPanel { Spacing = 15, Margin = new Thickness(20) };
+                
+                // Title
+                mainPanel.Children.Add(new TextBlock
+                {
+                    Text = "📐 LaTeX Formula Editor",
+                    FontSize = 18,
+                    FontWeight = Microsoft.UI.Text.FontWeights.Bold,
+                    HorizontalAlignment = HorizontalAlignment.Center
+                });
+
+                // Instructions
+                mainPanel.Children.Add(new TextBlock
+                {
+                    Text = "Enter your mathematical formula using LaTeX syntax. The preview will update as you type.",
+                    TextWrapping = TextWrapping.Wrap,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    Opacity = 0.8,
+                    Margin = new Thickness(0, 0, 0, 10)
+                });
+
+                // Formula input
+                var inputLabel = new TextBlock
+                {
+                    Text = "LaTeX Formula:",
+                    FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+                    Margin = new Thickness(0, 0, 0, 5)
+                };
+                mainPanel.Children.Add(inputLabel);
+
+                var formulaTextBox = new TextBox
+                {
+                    Height = 100,
+                    AcceptsReturn = true,
+                    TextWrapping = TextWrapping.Wrap,
+                    FontFamily = new FontFamily("Consolas, Courier New, monospace"),
+                    FontSize = 12,
+                    PlaceholderText = "Enter LaTeX formula, e.g.:\n\n$$x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$$\n\n$$\\sum_{i=1}^{n} x_i = x_1 + x_2 + ... + x_n$$\n\n$$\\int_{a}^{b} f(x) dx$$"
+                };
+                mainPanel.Children.Add(formulaTextBox);
+
+                // Quick templates
+                mainPanel.Children.Add(new TextBlock 
+                { 
+                    Text = "🔧 Quick Templates:", 
+                    FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+                    Margin = new Thickness(0, 10, 0, 5)
+                });
+
+                var templatesPanel = new StackPanel { Spacing = 8 };
+                
+                var templates = new[]
+                {
+                    ("Quadratic Formula", "$$x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$$"),
+                    ("Integral", "$$\\int_{a}^{b} f(x) dx = F(b) - F(a)$$"),
+                    ("Summation", "$$\\sum_{i=1}^{n} x_i = x_1 + x_2 + \\cdots + x_n$$"),
+                    ("Derivative", "$$\\frac{d}{dx}f(x) = \\lim_{h \\to 0} \\frac{f(x+h) - f(x)}{h}$$"),
+                    ("Matrix", "$$\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}$$"),
+                    ("Fraction", "$$\\frac{numerator}{denominator}$$"),
+                    ("Square Root", "$$\\sqrt{x^2 + y^2}$$"),
+                    ("Greek Letters", "$$\\alpha + \\beta = \\gamma$$"),
+                    ("Limits", "$$\\lim_{x \\to \\infty} f(x) = L$$"),
+                    ("Probability", "$$P(A \\cap B) = P(A) \\cdot P(B|A)$$")
+                };
+
+                var templateGrid = new Grid();
+                templateGrid.ColumnDefinitions.Add(new ColumnDefinition());
+                templateGrid.ColumnDefinitions.Add(new ColumnDefinition());
+                
+                for (int i = 0; i < templates.Length; i++)
+                {
+                    var (name, template) = templates[i];
+                    templateGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+                    
+                    var btn = new Button
+                    {
+                        Content = name,
+                        HorizontalAlignment = HorizontalAlignment.Stretch,
+                        Margin = new Thickness(2),
+                        FontSize = 11
+                    };
+                    
+                    btn.Click += (s, e) => {
+                        formulaTextBox.Text = template;
+                        formulaTextBox.Focus(FocusState.Programmatic);
+                    };
+                    
+                    Grid.SetRow(btn, i / 2);
+                    Grid.SetColumn(btn, i % 2);
+                    templateGrid.Children.Add(btn);
+                }
+
+                templatesPanel.Children.Add(templateGrid);
+                mainPanel.Children.Add(templatesPanel);
+
+                // LaTeX reference
+                var referenceExpander = new Expander
+                {
+                    Header = "📚 LaTeX Reference",
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
+                    Margin = new Thickness(0, 10, 0, 0)
+                };
+
+                var referenceContent = new TextBlock
+                {
+                    Text = @"Common LaTeX Commands:
+
+• Greek Letters: \alpha, \beta, \gamma, \pi, \theta, \omega
+• Operators: \pm (±), \times (×), \div (÷), \cdot (·)
+• Relations: \leq (≤), \geq (≥), \neq (≠), \approx (≈)
+• Functions: \sin, \cos, \tan, \log, \ln, \exp
+• Calculus: \int (integral), \sum (summation), \partial (∂)
+• Arrows: \rightarrow (→), \Rightarrow (⇒)
+• Set Theory: \in (∈), \subset (⊂), \cup (∪), \cap (∩)
+• Roots: \sqrt{x} (√x), \sqrt[3]{x} (∛x)
+• Fractions: \frac{num}{den}
+• Superscript: x^2, Subscript: x_1
+• Brackets: Use { } for grouping",
+                    FontFamily = new FontFamily("Consolas, Courier New, monospace"),
+                    FontSize = 10,
+                    TextWrapping = TextWrapping.Wrap,
+                    IsTextSelectionEnabled = true
+                };
+
+                referenceExpander.Content = referenceContent;
+                mainPanel.Children.Add(referenceExpander);
+
+                dialog.Content = mainPanel;
+                var result = await dialog.ShowAsync();
+                
+                if (result == ContentDialogResult.Primary && !string.IsNullOrWhiteSpace(formulaTextBox.Text))
+                {
+                    var formulaContent = formulaTextBox.Text.Trim();
+                    
+                    // Ensure formula is wrapped in $$ if not already
+                    if (!formulaContent.StartsWith("$$"))
+                    {
+                        formulaContent = "$$" + formulaContent + "$$";
+                    }
+                    
+                    var insertContent = $"\n\n{formulaContent}\n\n";
+                    
+                    SelectedDocument.Content += insertContent;
+                    SelectedDocument.ModifiedAt = DateTime.Now;
+                    await SaveCurrentDocument();
+                    
+                    System.Diagnostics.Debug.WriteLine($"Mathematical formula inserted: {formulaContent}");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error opening math formula dialog: {ex.Message}");
             }
         }
 
