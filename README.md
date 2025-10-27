@@ -29,6 +29,7 @@
 - **Estadísticas del documento**: Análisis completo de contenido
 - **Barra de estado**: Información en tiempo real (palabras, caracteres, tiempo de lectura, posición del cursor)
 - **Atajos de teclado**: Ctrl+B (negrita), Ctrl+I (cursiva), Ctrl+F (buscar), Ctrl+H (reemplazar)
+- - **Dibujar**: Dibuja sobre tus documentos
 - **Soporte avanzado de Markdown** incluyendo:
   - Encabezados (H1-H6)
   - Listas (viñetas, numeradas, tareas)
