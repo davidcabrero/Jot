@@ -12,27 +12,16 @@
                 <!-- Other merged dictionaries here -->
             </ResourceDictionary.MergedDictionaries>
             
-            <!-- Converters -->
+            <!-- Other app resources here -->
             <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
             <converters:NullToBooleanConverter x:Key="NullToBooleanConverter"/>
-            <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
-            <converters:InverseNullToVisibilityConverter x:Key="InverseNullToVisibilityConverter"/>
-            <converters:ViewModeToEditVisibilityConverter x:Key="ViewModeToEditVisibilityConverter"/>
-            <converters:ViewModeToPreviewVisibilityConverter x:Key="ViewModeToPreviewVisibilityConverter"/>
-            <converters:ViewModeToSplitVisibilityConverter x:Key="ViewModeToSplitVisibilityConverter"/>
-            <converters:ViewModeToEditBoolConverter x:Key="ViewModeToEditBoolConverter"/>
-            <converters:ViewModeToPreviewBoolConverter x:Key="ViewModeToPreviewBoolConverter"/>
-            <converters:ViewModeToSplitBoolConverter x:Key="ViewModeToSplitBoolConverter"/>
-            
-            <!-- Styles -->
-            <Style x:Key="ModernButtonStyle" TargetType="Button">
-                <Setter Property="Background" Value="Transparent"/>
-                <Setter Property="BorderThickness" Value="0"/>
-                <Setter Property="Padding" Value="12,8"/>
-                <Setter Property="CornerRadius" Value="4"/>
-            </Style>
-            
-            <!-- Other app resources here -->
+            <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
+            <converters:RecordingIconConverter x:Key="RecordingIconConverter"/>
+            <converters:RecordingTextConverter x:Key="RecordingTextConverter"/>
+            <converters:RecordingColorConverter x:Key="RecordingColorConverter"/>
+            <converters:RecordingTooltipConverter x:Key="RecordingTooltipConverter"/>
+            <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+            <converters:BoolToPrivateConverter x:Key="BoolToPrivateConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

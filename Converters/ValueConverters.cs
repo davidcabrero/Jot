@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Data;
+using Microsoft.UI.Xaml.Media;
 using System;
 
 namespace Jot.Converters
@@ -25,166 +26,6 @@ namespace Jot.Converters
         }
     }
 
-    public class InverseBooleanToVisibilityConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, string language)
-        {
-            if (value is bool boolValue)
-            {
-                return boolValue ? Visibility.Collapsed : Visibility.Visible;
-            }
-            return Visibility.Visible;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, string language)
-        {
-            if (value is Visibility visibility)
-            {
-                return visibility == Visibility.Collapsed;
-            }
-            return true;
-        }
-    }
-
-    public class StringToVisibilityConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, string language)
-        {
-            if (value is string stringValue)
-            {
-                return string.IsNullOrEmpty(stringValue) ? Visibility.Collapsed : Visibility.Visible;
-            }
-            return Visibility.Collapsed;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, string language)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class NullToVisibilityConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, string language)
-        {
-            return value == null ? Visibility.Collapsed : Visibility.Visible;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, string language)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class InverseNullToVisibilityConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, string language)
-        {
-            return value == null ? Visibility.Visible : Visibility.Collapsed;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, string language)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class ViewModeToEditVisibilityConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, string language)
-        {
-            if (value is ViewMode mode)
-                return mode == ViewMode.Edit ? Visibility.Visible : Visibility.Collapsed;
-            return Visibility.Collapsed;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, string language)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class ViewModeToPreviewVisibilityConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, string language)
-        {
-            if (value is ViewMode mode)
-                return mode == ViewMode.Preview ? Visibility.Visible : Visibility.Collapsed;
-            return Visibility.Collapsed;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, string language)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class ViewModeToSplitVisibilityConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, string language)
-        {
-            if (value is ViewMode mode)
-                return mode == ViewMode.Split ? Visibility.Visible : Visibility.Collapsed;
-            return Visibility.Collapsed;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, string language)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class ViewModeToEditBoolConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, string language)
-        {
-            if (value is ViewMode mode)
-                return mode == ViewMode.Edit;
-            return false;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, string language)
-        {
-            if (value is bool isChecked && isChecked)
-                return ViewMode.Edit;
-            return ViewMode.Preview;
-        }
-    }
-
-    public class ViewModeToPreviewBoolConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, string language)
-        {
-            if (value is ViewMode mode)
-                return mode == ViewMode.Preview;
-            return false;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, string language)
-        {
-            if (value is bool isChecked && isChecked)
-                return ViewMode.Preview;
-            return ViewMode.Edit;
-        }
-    }
-
-    public class ViewModeToSplitBoolConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, string language)
-        {
-            if (value is ViewMode mode)
-                return mode == ViewMode.Split;
-            return false;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, string language)
-        {
-            if (value is bool isChecked && isChecked)
-                return ViewMode.Split;
-            return ViewMode.Edit;
-        }
-    }
-
     public class NullToBooleanConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, string language)
@@ -195,6 +36,123 @@ namespace Jot.Converters
         public object ConvertBack(object value, Type targetType, object parameter, string language)
         {
             throw new NotImplementedException();
+        }
+    }
+
+    public class InverseBooleanConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
+            if (value is bool boolValue)
+            {
+                return !boolValue;
+            }
+            return true;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            if (value is bool boolValue)
+            {
+                return !boolValue;
+            }
+            return false;
+        }
+    }
+
+    public class RecordingIconConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
+            if (value is bool isRecording)
+            {
+                return isRecording ? "\uE71A" : "\uE714"; // Stop : Record
+            }
+            return "\uE714";
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class RecordingTextConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
+            if (value is bool isRecording)
+            {
+                return isRecording ? "Stop" : "Record";
+            }
+            return "Record";
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class RecordingColorConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
+            if (value is bool isRecording)
+            {
+                return isRecording ? 
+  new SolidColorBrush(Microsoft.UI.Colors.Red) : 
+         new SolidColorBrush(Microsoft.UI.Colors.Gray);
+            }
+            return new SolidColorBrush(Microsoft.UI.Colors.Gray);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class RecordingTooltipConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
+            if (value is bool isRecording)
+            {
+    return isRecording ? "Stop Screen Recording" : "Start Screen Recording";
+            }
+            return "Start Screen Recording";
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class BoolToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
+            return (bool)value ? Microsoft.UI.Xaml.Visibility.Visible : Microsoft.UI.Xaml.Visibility.Collapsed;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            return (Microsoft.UI.Xaml.Visibility)value == Microsoft.UI.Xaml.Visibility.Visible;
+        }
+    }
+
+    public class BoolToPrivateConverter : IValueConverter
+    {
+  public object Convert(object value, Type targetType, object parameter, string language)
+        {
+  return (bool)value ? "🔒 Private" : "🌐 Public";
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+       throw new NotImplementedException();
         }
     }
 }

@@ -431,8 +431,217 @@ namespace Jot.Controls
 
         private void ImageButton_Click(object sender, RoutedEventArgs e)
         {
-            InsertMarkdown("![Alt text](", ")");
+            ShowImageDialog();
+     }
+
+        private async void ShowImageDialog()
+      {
+   try
+      {
+     var dialog = new ContentDialog
+    {
+           Title = "🖼️ Insert Image",
+     PrimaryButtonText = "Insert",
+         SecondaryButtonText = "Browse File",
+       CloseButtonText = "Cancel",
+  XamlRoot = this.XamlRoot
+         };
+
+       var panel = new StackPanel { Spacing = 12, Width = 400 };
+
+        // URL input
+                var urlTextBox = new TextBox
+       {
+           Header = "Image URL",
+      PlaceholderText = "https://example.com/image.jpg"
+        };
+            panel.Children.Add(urlTextBox);
+
+  // Alt text
+ var altTextBox = new TextBox
+     {
+    Header = "Alt text (description)",
+  PlaceholderText = "Description of the image"
+  };
+                panel.Children.Add(altTextBox);
+
+             // Preview area
+          var previewBorder = new Border
+          {
+             Background = new SolidColorBrush(Microsoft.UI.ColorHelper.FromArgb(255, 248, 248, 248)),
+     BorderBrush = new SolidColorBrush(Microsoft.UI.ColorHelper.FromArgb(255, 200, 200, 200)),
+          BorderThickness = new Thickness(1),
+       CornerRadius = new CornerRadius(4),
+    Height = 150,
+  Margin = new Thickness(0, 8, 0, 0)
+      };
+
+                var previewImage = new Image
+  {
+        Stretch = Stretch.Uniform,
+              HorizontalAlignment = HorizontalAlignment.Center,
+  VerticalAlignment = VerticalAlignment.Center
+    };
+
+   var previewText = new TextBlock
+       {
+           Text = "Image preview will appear here",
+      HorizontalAlignment = HorizontalAlignment.Center,
+    VerticalAlignment = VerticalAlignment.Center,
+                  Foreground = new SolidColorBrush(Microsoft.UI.ColorHelper.FromArgb(255, 128, 128, 128))
+         };
+
+         var previewGrid = new Grid();
+    previewGrid.Children.Add(previewText);
+            previewGrid.Children.Add(previewImage);
+                previewBorder.Child = previewGrid;
+              panel.Children.Add(previewBorder);
+
+            dialog.Content = panel;
+
+        // URL change handler for preview
+        urlTextBox.TextChanged += async (s, e) =>
+    {
+   if (!string.IsNullOrEmpty(urlTextBox.Text) && Uri.TryCreate(urlTextBox.Text, UriKind.Absolute, out var uri))
+        {
+  try
+    {
+  previewImage.Source = new Microsoft.UI.Xaml.Media.Imaging.BitmapImage(uri);
+       previewText.Visibility = Visibility.Collapsed;
+       previewImage.Visibility = Visibility.Visible;
+      }
+         catch
+             {
+      previewImage.Visibility = Visibility.Collapsed;
+     previewText.Visibility = Visibility.Visible;
+             previewText.Text = "Failed to load image";
+           }
+ }
+           else
+{
+  previewImage.Visibility = Visibility.Collapsed;
+   previewText.Visibility = Visibility.Visible;
+    previewText.Text = "Image preview will appear here";
+         }
+           };
+
+ var result = await dialog.ShowAsync();
+
+    if (result == ContentDialogResult.Primary && !string.IsNullOrEmpty(urlTextBox.Text))
+     {
+       var altText = string.IsNullOrEmpty(altTextBox.Text) ? "Image" : altTextBox.Text;
+  var imageMarkdown = $"![{altText}]({urlTextBox.Text})";
+         InsertText(imageMarkdown);
+      }
+         else if (result == ContentDialogResult.Secondary)
+           {
+   await BrowseForImageFile();
+         }
+   }
+            catch (Exception ex)
+          {
+      System.Diagnostics.Debug.WriteLine($"Error showing image dialog: {ex.Message}");
+     // Fallback to simple insertion
+        InsertMarkdown("![Alt text](", ")");
+            }
         }
+
+        private async Task BrowseForImageFile()
+    {
+            try
+            {
+      var picker = new FileOpenPicker();
+                picker.FileTypeFilter.Add(".jpg");
+     picker.FileTypeFilter.Add(".jpeg");
+    picker.FileTypeFilter.Add(".png");
+            picker.FileTypeFilter.Add(".gif");
+    picker.FileTypeFilter.Add(".bmp");
+                picker.FileTypeFilter.Add(".svg");
+   picker.FileTypeFilter.Add(".webp");
+
+    // Get the current window handle
+      var window = App.MainWindow;
+         var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(window);
+                WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+
+     var file = await picker.PickSingleFileAsync();
+       if (file != null)
+      {
+        // For local files, we'll create a relative path or use file:// URL
+ var filePath = file.Path;
+         var fileName = file.Name;
+            
+        // Show dialog with file info
+          var fileDialog = new ContentDialog
+       {
+     Title = "Selected Image File",
+ PrimaryButtonText = "Insert",
+ CloseButtonText = "Cancel",
+            XamlRoot = this.XamlRoot
+  };
+
+           var filePanel = new StackPanel { Spacing = 12 };
+             
+     filePanel.Children.Add(new TextBlock 
+         { 
+       Text = $"File: {fileName}",
+        FontWeight = Microsoft.UI.Text.FontWeights.SemiBold
+               });
+
+    var altTextBox = new TextBox
+         {
+ Header = "Alt text (description)",
+     PlaceholderText = fileName,
+           Text = fileName
+    };
+        filePanel.Children.Add(altTextBox);
+
+         // Show preview
+         try
+         {
+ var previewImage = new Image
+          {
+        MaxHeight = 200,
+ Stretch = Stretch.Uniform,
+         Margin = new Thickness(0, 8, 0, 0)
+    };
+
+ var bitmap = new Microsoft.UI.Xaml.Media.Imaging.BitmapImage();
+  using (var stream = await file.OpenAsync(FileAccessMode.Read))
+    {
+      await bitmap.SetSourceAsync(stream);
+         }
+               previewImage.Source = bitmap;
+         filePanel.Children.Add(previewImage);
+         }
+     catch
+            {
+              filePanel.Children.Add(new TextBlock 
+               { 
+         Text = "Could not preview image",
+          Foreground = new SolidColorBrush(Microsoft.UI.ColorHelper.FromArgb(255, 128, 128, 128))
+       });
+               }
+
+              fileDialog.Content = filePanel;
+
+         var result = await fileDialog.ShowAsync();
+    if (result == ContentDialogResult.Primary)
+          {
+     var altText = string.IsNullOrEmpty(altTextBox.Text) ? fileName : altTextBox.Text;
+             // Use file:// URL for local files
+  var imageMarkdown = $"![{altText}](file:///{filePath.Replace('\\', '/')})";
+       InsertText(imageMarkdown);
+                }
+          }
+  }
+            catch (Exception ex)
+       {
+      System.Diagnostics.Debug.WriteLine($"Error browsing for image file: {ex.Message}");
+     // Fallback to simple insertion
+     InsertMarkdown("![Alt text](", ")");
+            }
+ }
 
         private void LinkButton_Click(object sender, RoutedEventArgs e)
         {

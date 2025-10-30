@@ -29,7 +29,10 @@
 - **Estadísticas del documento**: Análisis completo de contenido
 - **Barra de estado**: Información en tiempo real (palabras, caracteres, tiempo de lectura, posición del cursor)
 - **Atajos de teclado**: Ctrl+B (negrita), Ctrl+I (cursiva), Ctrl+F (buscar), Ctrl+H (reemplazar)
-- - **Dibujar**: Dibuja sobre tus documentos
+- **Dibujar**: Dibuja sobre tus documentos
+- **Python**: Ejecuta código Python
+- **Github**: Sube tus documentos a la nube
+- **HTML**: Exporta tus documentos a HTML
 - **Soporte avanzado de Markdown** incluyendo:
   - Encabezados (H1-H6)
   - Listas (viñetas, numeradas, tareas)
@@ -66,6 +69,7 @@
 - **Funcionalidad de clic para navegar** para navegación rápida del documento
 - **Alternar barra lateral** para escritura enfocada
 
+
 ### **Interfaz de Usuario**
 - **Diseño Fluent moderno** con WinUI 3
 - **Fondo Mica** para integración con Windows 11
@@ -101,6 +105,8 @@
 <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
 <PackageReference Include="PdfSharpCore" Version="1.3.65" />
 <PackageReference Include="Markdig" Version="0.37.0" />
+<PackageReference Include="NAudio" Version="2.2.1" />
+<PackageReference Include="System.Drawing.Common" Version="8.0.0" />
 ```
 
 ## Requisitos del Sistema
@@ -167,6 +173,7 @@
 3. **Comenzar a escribir** tu contenido usando sintaxis Markdown
 4. **Usar la barra de herramientas** para opciones de formato rápido
 5. **Cambiar entre modos de vista** usando los botones Editar/Vista Previa/Dividir
+
 
 ## Estructura del Proyecto
 

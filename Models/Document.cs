@@ -14,6 +14,8 @@ namespace Jot.Models
         public List<string> Tags { get; set; } = new List<string>();
         public string FolderPath { get; set; } = "";
         public DocumentType Type { get; set; } = DocumentType.Markdown;
+        public Dictionary<string, PythonCell> PythonCells { get; set; } = new Dictionary<string, PythonCell>();
+        public List<string> AttachedImages { get; set; } = new List<string>();
     }
 
     public enum DocumentType
@@ -22,6 +24,18 @@ namespace Jot.Models
         RichText,
         Code,
         Quiz
+    }
+
+    public class PythonCell
+    {
+        public string Id { get; set; } = "";
+        public string Code { get; set; } = "";
+        public string Output { get; set; } = "";
+        public DateTime ExecutedAt { get; set; }
+        public string InterpreterName { get; set; } = "";
+        public List<string> PlotFiles { get; set; } = new List<string>();
+        public bool IsExecutable { get; set; } = true;
+        public Dictionary<string, object> Metadata { get; set; } = new Dictionary<string, object>();
     }
 
     public class QuizQuestion

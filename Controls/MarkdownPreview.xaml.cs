@@ -12,6 +12,7 @@ using System.Linq;
 using System.Diagnostics;
 using System.Text;
 using Windows.Foundation;
+using System.IO;
 
 namespace Jot.Controls
 {
@@ -452,7 +453,7 @@ namespace Jot.Controls
             
             stackPanel.Children.Add(new TextBlock 
             { 
-                Text = number + ".", 
+                Text = number + ".",
                 Margin = new Thickness(16, 0, 12, 0),
                 VerticalAlignment = VerticalAlignment.Top,
                 FontSize = 14,
@@ -1021,56 +1022,179 @@ namespace Jot.Controls
 
         private void AddImage(string altText, string imageSrc)
         {
-            var border = new Border
+  var border = new Border
             {
-                Background = new SolidColorBrush(Color.FromArgb(40, 128, 128, 128)),
-                CornerRadius = new CornerRadius(8),
-                Padding = new Thickness(16),
+        CornerRadius = new CornerRadius(8),
                 Margin = new Thickness(0, 12, 0, 12),
                 HorizontalAlignment = HorizontalAlignment.Center
+        };
+
+  var stackPanel = new StackPanel
+            {
+      HorizontalAlignment = HorizontalAlignment.Center
             };
 
-            var stackPanel = new StackPanel
-            {
-                HorizontalAlignment = HorizontalAlignment.Center
-            };
+   try
+  {
+    // Try to load the actual image
+           var imageElement = new Image
+       {
+       MaxWidth = 600,
+      MaxHeight = 400,
+     Stretch = Stretch.Uniform,
+ HorizontalAlignment = HorizontalAlignment.Center
+      };
 
-            // Image icon
-            var imageIcon = new FontIcon
-            {
-                Glyph = "\uEB9F", // Image icon
-                FontSize = 48,
-                Foreground = new SolidColorBrush(Color.FromArgb(180, 100, 149, 237)),
-                HorizontalAlignment = HorizontalAlignment.Center
-            };
-            stackPanel.Children.Add(imageIcon);
+        // Handle different types of image sources
+      bool imageLoaded = false;
 
-            // Alt text
-            if (!string.IsNullOrEmpty(altText))
+      if (imageSrc.StartsWith("http://") || imageSrc.StartsWith("https://"))
+    {
+              // Web URL
+          try
+   {
+    var bitmap = new Microsoft.UI.Xaml.Media.Imaging.BitmapImage(new Uri(imageSrc));
+       imageElement.Source = bitmap;
+    imageLoaded = true;
+       }
+       catch (Exception ex)
+       {
+     System.Diagnostics.Debug.WriteLine($"Error loading web image {imageSrc}: {ex.Message}");
+     }
+  }
+        else if (imageSrc.StartsWith("file:///"))
+        {
+        // Local file path
+       try
+      {
+    var filePath = imageSrc.Replace("file:///", "").Replace("/", "\\");
+       if (System.IO.File.Exists(filePath))
+      {
+     var bitmap = new Microsoft.UI.Xaml.Media.Imaging.BitmapImage(new Uri($"file:///{filePath}"));
+   imageElement.Source = bitmap;
+      imageLoaded = true;
+ }
+      }
+          catch (Exception ex)
+      {
+      System.Diagnostics.Debug.WriteLine($"Error loading local file {imageSrc}: {ex.Message}");
+        }
+      }
+     else if (System.IO.File.Exists(imageSrc))
+   {
+     // Direct file path
+    try
+       {
+   var bitmap = new Microsoft.UI.Xaml.Media.Imaging.BitmapImage(new Uri($"file:///{System.IO.Path.GetFullPath(imageSrc)}"));
+   imageElement.Source = bitmap;
+      imageLoaded = true;
+        }
+     catch (Exception ex)
+    {
+       System.Diagnostics.Debug.WriteLine($"Error loading direct file {imageSrc}: {ex.Message}");
+  }
+ }
+
+                if (imageLoaded)
+          {
+        // Add the actual image
+       var imageBorder = new Border
+       {
+            BorderBrush = new SolidColorBrush(Color.FromArgb(100, 128, 128, 128)),
+        BorderThickness = new Thickness(1),
+CornerRadius = new CornerRadius(4),
+  Child = imageElement
+    };
+        stackPanel.Children.Add(imageBorder);
+
+       // Add alt text as caption
+        if (!string.IsNullOrEmpty(altText))
+   {
+     var captionBlock = new TextBlock
+         {
+        Text = altText,
+        FontSize = 12,
+      FontStyle = Windows.UI.Text.FontStyle.Italic,
+         HorizontalAlignment = HorizontalAlignment.Center,
+       Margin = new Thickness(0, 8, 0, 0),
+    TextWrapping = TextWrapping.Wrap,
+   Opacity = 0.8
+};
+      stackPanel.Children.Add(captionBlock);
+           }
+        }
+         else
+              {
+         // Fallback to placeholder with icon
+           border.Background = new SolidColorBrush(Color.FromArgb(40, 128, 128, 128));
+           border.Padding = new Thickness(16);
+
+          // Image icon
+         var imageIcon = new FontIcon
+               {
+      Glyph = "\uEB9F", // Image icon
+  FontSize = 48,
+         Foreground = new SolidColorBrush(Color.FromArgb(180, 100, 149, 237)),
+            HorizontalAlignment = HorizontalAlignment.Center
+           };
+  stackPanel.Children.Add(imageIcon);
+
+        // Alt text
+  if (!string.IsNullOrEmpty(altText))
+       {
+   var altTextBlock = new TextBlock
             {
-                var altTextBlock = new TextBlock
+ Text = altText,
+        FontSize = 14,
+           FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+  HorizontalAlignment = HorizontalAlignment.Center,
+   Margin = new Thickness(0, 8, 0, 4),
+     TextWrapping = TextWrapping.Wrap
+      };
+         stackPanel.Children.Add(altTextBlock);
+        }
+
+      // Error message
+  var errorTextBlock = new TextBlock
+          {
+             Text = $"Could not load image: {imageSrc}",
+           FontSize = 12,
+    Opacity = 0.7,
+     HorizontalAlignment = HorizontalAlignment.Center,
+       TextWrapping = TextWrapping.Wrap,
+       Margin = new Thickness(0, 4, 0, 0)
+          };
+     stackPanel.Children.Add(errorTextBlock);
+                }
+            }
+      catch (Exception ex)
+         {
+       System.Diagnostics.Debug.WriteLine($"Error in AddImage: {ex.Message}");
+        
+// Complete fallback
+ border.Background = new SolidColorBrush(Color.FromArgb(40, 128, 128, 128));
+border.Padding = new Thickness(16);
+
+ var errorIcon = new FontIcon
+    {
+             Glyph = "\uE783", // Error icon
+        FontSize = 32,
+  Foreground = new SolidColorBrush(Color.FromArgb(180, 255, 100, 100)),
+        HorizontalAlignment = HorizontalAlignment.Center
+        };
+     stackPanel.Children.Add(errorIcon);
+
+     var errorText = new TextBlock
                 {
-                    Text = altText,
-                    FontSize = 14,
-                    FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    Margin = new Thickness(0, 8, 0, 4)
+        Text = "Image Error",
+   FontSize = 14,
+            HorizontalAlignment = HorizontalAlignment.Center,
+           Margin = new Thickness(0, 8, 0, 0)
                 };
-                stackPanel.Children.Add(altTextBlock);
+          stackPanel.Children.Add(errorText);
             }
 
-            // Image source
-            var sourceTextBlock = new TextBlock
-            {
-                Text = $"Image: {imageSrc}",
-                FontSize = 12,
-                Opacity = 0.7,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                TextWrapping = TextWrapping.Wrap
-            };
-            stackPanel.Children.Add(sourceTextBlock);
-
-            border.Child = stackPanel;
+       border.Child = stackPanel;
             ContentPanel.Children.Add(border);
         }
 
