@@ -69,7 +69,6 @@
 - **Funcionalidad de clic para navegar** para navegación rápida del documento
 - **Alternar barra lateral** para escritura enfocada
 
-
 ### **Interfaz de Usuario**
 - **Diseño Fluent moderno** con WinUI 3
 - **Fondo Mica** para integración con Windows 11
@@ -79,14 +78,6 @@
   - **Modo Dividido**: Edición y vista previa lado a lado
 - **Diseño responsivo** con paneles plegables
 - **Soporte de tema oscuro/claro** (consciente del sistema)
-
-### **Rendimiento y Confiabilidad**
-- **Renderizado en tiempo real** del contenido Markdown
-- **Análisis e indexación eficiente** de documentos
-- **Manejo de errores** con respaldos elegantes
-- **Almacenamiento de documentos eficiente en memoria**
-- **Procesamiento optimizado** para tablas, fórmulas y diagramas
-- **Actualización en tiempo real** de estadísticas y métricas
 
 ## Stack Tecnológico
 
@@ -163,17 +154,6 @@
    # O ejecutar el ejecutable directamente
    .\bin\Debug\net8.0-windows10.0.19041.0\win-x64\Jot.exe
    ```
-
-## Guía de Uso
-
-### Crea Tu Primer Documento
-
-1. **Lanzar Jot**
-2. **Hacer clic en "Crear Nuevo Documento"** o usar el botón + en la barra de herramientas
-3. **Comenzar a escribir** tu contenido usando sintaxis Markdown
-4. **Usar la barra de herramientas** para opciones de formato rápido
-5. **Cambiar entre modos de vista** usando los botones Editar/Vista Previa/Dividir
-
 
 ## Estructura del Proyecto
 
