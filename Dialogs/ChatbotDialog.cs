@@ -20,11 +20,11 @@ namespace Jot.Dialogs
         {
             _chatbotService = chatbotService;
             _documents = documents;
-            
-            this.Title = "🤖 AI Assistant";
-            this.PrimaryButtonText = "Cerrar";
+
+            this.Title = "🤖 " + LocalizationService.Instance.GetString("AIAssistant");
+            this.PrimaryButtonText = LocalizationService.Instance.GetString("Close");
             this.DefaultButton = ContentDialogButton.Primary;
-            
+
             SetupUI();
             LoadSuggestedQuestions();
         }
@@ -66,7 +66,7 @@ namespace Jot.Dialogs
 
             var welcomeText = new TextBlock
             {
-                Text = "¡Hola! Soy tu asistente de documentos. Puedes preguntarme sobre el contenido de tus documentos.",
+                Text = LocalizationService.Instance.GetString("ChatbotWelcome") ?? "¡Hola! Soy tu asistente de documentos. Puedes preguntarme sobre el contenido de tus documentos.",
                 Foreground = new SolidColorBrush(Color.FromArgb(255, 255, 255, 255)),
                 TextWrapping = TextWrapping.Wrap,
                 FontSize = 14
@@ -107,7 +107,7 @@ namespace Jot.Dialogs
             var questionBox = new TextBox
             {
                 Name = "QuestionTextBox",
-                PlaceholderText = "Pregunta sobre tus documentos...",
+                PlaceholderText = LocalizationService.Instance.GetString("EnterYourQuestion"),
                 AcceptsReturn = false,
                 MaxLength = 500,
                 Margin = new Thickness(0, 0, 8, 0)
@@ -116,7 +116,7 @@ namespace Jot.Dialogs
             var sendButton = new Button
             {
                 Name = "SendButton",
-                Content = "Enviar",
+                Content = LocalizationService.Instance.GetString("Send"),
                 Style = Application.Current.Resources["AccentButtonStyle"] as Style,
                 IsEnabled = false
             };

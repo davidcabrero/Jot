@@ -19,22 +19,56 @@ namespace Jot.Controls
     {
         public static readonly DependencyProperty TextProperty =
             DependencyProperty.Register(nameof(Text), typeof(string), typeof(RichTextEditor),
-                new PropertyMetadata(string.Empty, OnTextChanged));
+              new PropertyMetadata(string.Empty, OnTextChanged));
 
         public static readonly DependencyProperty CurrentTextColorProperty =
-            DependencyProperty.Register(nameof(CurrentTextColor), typeof(SolidColorBrush), typeof(RichTextEditor),
-                new PropertyMetadata(new SolidColorBrush(Color.FromArgb(255, 0, 0, 0))));
+  DependencyProperty.Register(nameof(CurrentTextColor), typeof(SolidColorBrush), typeof(RichTextEditor),
+         new PropertyMetadata(new SolidColorBrush(Color.FromArgb(255, 0, 0, 0))));
 
         public string Text
-        {
+     {
             get => (string)GetValue(TextProperty);
-            set => SetValue(TextProperty, value);
+      set => SetValue(TextProperty, value);
+      }
+
+     public SolidColorBrush CurrentTextColor
+ {
+          get => (SolidColorBrush)GetValue(CurrentTextColorProperty);
+            set => SetValue(CurrentTextColorProperty, value);
+ }
+
+        // Propiedades adicionales para acceso desde MainWindow
+      public string SelectedText => ContentTextBox?.SelectedText ?? "";
+  public int SelectionStart 
+        { 
+            get => ContentTextBox?.SelectionStart ?? 0;
+            set { if (ContentTextBox != null) ContentTextBox.SelectionStart = value; }
+        }
+   public int SelectionLength 
+  { 
+    get => ContentTextBox?.SelectionLength ?? 0;
+            set { if (ContentTextBox != null) ContentTextBox.SelectionLength = value; }
+   }
+        
+   public double FontSize
+        {
+     get => ContentTextBox?.FontSize ?? 14;
+ set { if (ContentTextBox != null) ContentTextBox.FontSize = value; }
         }
 
-        public SolidColorBrush CurrentTextColor
+        // Métodos públicos para inserción de texto
+        public void InsertTextAtSelection(string text)
         {
-            get => (SolidColorBrush)GetValue(CurrentTextColorProperty);
-            set => SetValue(CurrentTextColorProperty, value);
+        if (ContentTextBox != null)
+     {
+ContentTextBox.SelectedText = text;
+            ContentTextBox.Focus(FocusState.Programmatic);
+    }
+        }
+
+        public void SetFocus()
+{
+    ContentTextBox?.Focus(FocusState.Programmatic);
         }
 
         private static void OnTextChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)

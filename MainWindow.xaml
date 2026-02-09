@@ -17,6 +17,9 @@
     </Window.SystemBackdrop>
 
     <Grid x:Name="RootGrid">
+        <Grid.Resources>
+            <converters:LocalizationConverter x:Key="LocalizationConverter"/>
+        </Grid.Resources>
 <Grid.RowDefinitions>
        <RowDefinition Height="Auto"/>
        <RowDefinition Height="*"/>
@@ -79,6 +82,40 @@
      ToolTipService.ToolTip="GitHub Settings">
           <FontIcon Glyph="&#xE8F7;" FontSize="16"/>
   </Button>
+
+           <!-- Language Selection Button -->
+           <Button x:Name="LanguageButton" Background="Transparent" BorderThickness="0"
+                   ToolTipService.ToolTip="Language / Idioma">
+               <Button.Flyout>
+                   <MenuFlyout x:Name="LanguageFlyout">
+                       <MenuFlyoutItem Text="English" x:Name="EnglishMenuItem" Click="ChangeLanguage_Click" Tag="en">
+                           <MenuFlyoutItem.Icon>
+                               <FontIcon Glyph="&#xE71B;" FontSize="16"/>
+                           </MenuFlyoutItem.Icon>
+                       </MenuFlyoutItem>
+                       <MenuFlyoutItem Text="Español" x:Name="SpanishMenuItem" Click="ChangeLanguage_Click" Tag="es">
+                           <MenuFlyoutItem.Icon>
+                               <FontIcon Glyph="&#xE71B;" FontSize="16"/>
+                           </MenuFlyoutItem.Icon>
+                       </MenuFlyoutItem>
+                       <MenuFlyoutItem Text="Català" x:Name="CatalanMenuItem" Click="ChangeLanguage_Click" Tag="ca">
+                           <MenuFlyoutItem.Icon>
+                               <FontIcon Glyph="&#xE71B;" FontSize="16"/>
+                           </MenuFlyoutItem.Icon>
+                       </MenuFlyoutItem>
+                       <MenuFlyoutItem Text="Asturianu" x:Name="AsturianMenuItem" Click="ChangeLanguage_Click" Tag="ast">
+                           <MenuFlyoutItem.Icon>
+                               <FontIcon Glyph="&#xE71B;" FontSize="16"/>
+                           </MenuFlyoutItem.Icon>
+                       </MenuFlyoutItem>
+                   </MenuFlyout>
+               </Button.Flyout>
+               <StackPanel Orientation="Horizontal" Spacing="4">
+                   <FontIcon Glyph="&#xE774;" FontSize="16"/>
+                   <TextBlock x:Name="CurrentLanguageText" Text="EN" FontSize="10" VerticalAlignment="Center"/>
+               </StackPanel>
+           </Button>
+
            <Border Width="1" Height="20" Background="{ThemeResource DividerStrokeColorDefaultBrush}" Margin="4,0"/>
      <Button Background="Transparent" BorderThickness="0"
    Click="ToggleChatbot_Click"
@@ -103,7 +140,7 @@
     <RowDefinition Height="Auto"/>
     </Grid.RowDefinitions>
 
-<TextBlock Grid.Row="0" Text="Documents" 
+<TextBlock Grid.Row="0" x:Name="DocumentsHeaderText" Text="Documents" 
          FontWeight="SemiBold" FontSize="16" Margin="0,0,0,8"/>
     
         <TextBox Grid.Row="1" x:Name="SearchBox" 
@@ -141,7 +178,8 @@
     Text="GitHub" 
       FontWeight="SemiBold" 
              VerticalAlignment="Center"
-    Margin="8,0,0,0"/>
+    Margin="8,0,0,0"
+    x:Name="GitHubHeaderText"/>
                   
          <Button Grid.Column="2" 
    x:Name="GitHubToggleButton"
@@ -181,7 +219,7 @@ Margin="6,0,0,0"
           Visibility="Collapsed" 
          Spacing="4">
              
-   <Button x:Name="UploadCurrentDocButton"
+                <Button x:Name="UploadCurrentDocButton"
     Background="{ThemeResource AccentFillColorDefaultBrush}"
           Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
        HorizontalAlignment="Stretch"
@@ -189,7 +227,7 @@ Margin="6,0,0,0"
         Padding="8,4">
       <StackPanel Orientation="Horizontal" Spacing="6">
    <FontIcon Glyph="&#xE898;" FontSize="14"/>
-      <TextBlock Text="Upload Current" FontSize="12"/>
+      <TextBlock x:Name="UploadCurrentText" Text="Upload Current" FontSize="12"/>
      </StackPanel>
         </Button>
      
@@ -202,7 +240,7 @@ Margin="6,0,0,0"
          Padding="8,4">
     <StackPanel Orientation="Horizontal" Spacing="6">
            <FontIcon Glyph="&#xE8F7;" FontSize="14"/>
-    <TextBlock Text="Repositories" FontSize="12"/>
+    <TextBlock x:Name="RepositoriesText" Text="Repositories" FontSize="12"/>
              </StackPanel>
            </Button>
             
@@ -214,7 +252,7 @@ Margin="6,0,0,0"
                 Padding="8,4">
                 <StackPanel Orientation="Horizontal" Spacing="6">
   <FontIcon Glyph="&#xE8BB;" FontSize="14"/>
- <TextBlock Text="Disconnect" FontSize="12" Opacity="0.8"/>
+ <TextBlock x:Name="DisconnectText" Text="Disconnect" FontSize="12" Opacity="0.8"/>
       </StackPanel>
            </Button>
            </StackPanel>
@@ -228,7 +266,7 @@ Margin="6,0,0,0"
       Padding="8,4">
     <StackPanel Orientation="Horizontal" Spacing="6">
              <FontIcon Glyph="&#xE8FA;" FontSize="14"/>
-      <TextBlock Text="Connect GitHub" FontSize="12"/>
+      <TextBlock x:Name="ConnectGitHubText" Text="Connect GitHub" FontSize="12"/>
         </StackPanel>
       </Button>
  </StackPanel>
@@ -339,16 +377,16 @@ Margin="6,0,0,0"
   <ToggleButton x:Name="EditModeButton" 
   Content="Edit" 
              ToolTipService.ToolTip="Edit Mode"/>
-        
+
          <ToggleButton x:Name="PreviewModeButton" 
   Content="Preview" 
          ToolTipService.ToolTip="Preview Mode"/>
-          
+
        <ToggleButton x:Name="SplitModeButton" 
       Content="Split" 
        ToolTipService.ToolTip="Split Mode"/>
 
-        <TextBlock Text="Last modified"
+        <TextBlock x:Name="LastModifiedText" Text="Last modified"
 Opacity="0.7" 
      FontSize="12" 
     VerticalAlignment="Center"
@@ -388,9 +426,9 @@ Opacity="0.7"
     <Grid Grid.Row="1" x:Name="EmptyStateGrid">
    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="16">
  <FontIcon Glyph="&#xE8A5;" FontSize="64" Opacity="0.3"/>
-         <TextBlock Text="Welcome to Jot" FontSize="24" FontWeight="SemiBold" HorizontalAlignment="Center"/>
-      <TextBlock Text="Create your first document to get started" Opacity="0.7" HorizontalAlignment="Center"/>
-   <Button Content="Create New Document" 
+         <TextBlock x:Name="WelcomeText" Text="Welcome to Jot" FontSize="24" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+      <TextBlock x:Name="CreateFirstDocText" Text="Create your first document to get started" Opacity="0.7" HorizontalAlignment="Center"/>
+   <Button x:Name="CreateNewDocButton" Content="Create New Document" 
       Style="{ThemeResource AccentButtonStyle}"
             Click="CreateNewDocument_Click"/>
                   </StackPanel>
@@ -412,7 +450,7 @@ Opacity="0.7"
 BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
     BorderThickness="0,0,0,1"
       Padding="12,8">
-         <TextBlock Text="Document Index" 
+         <TextBlock x:Name="DocumentIndexHeader" Text="Document Index" 
           FontWeight="SemiBold" 
         FontSize="14"/>
      </Border>
@@ -449,7 +487,7 @@ TextTrimming="CharacterEllipsis"
     Visibility="Collapsed">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="16">
      <ProgressRing IsActive="True" Width="48" Height="48"/>
-                <TextBlock Text="Exporting to HTML..." FontSize="16" HorizontalAlignment="Center"/>
+                <TextBlock x:Name="ExportingText" Text="Exporting to HTML..." FontSize="16" HorizontalAlignment="Center"/>
       </StackPanel>
     </Grid>
 </Grid>

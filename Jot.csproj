@@ -72,4 +72,10 @@
     </Page>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Strings\ast\" />
+    <Folder Include="Strings\ca\" />
+    <Folder Include="Strings\es\" />
+  </ItemGroup>
+
 </Project>
