@@ -78,6 +78,7 @@
   - **Modo Dividido**: Edición y vista previa lado a lado
 - **Diseño responsivo** con paneles plegables
 - **Soporte de tema oscuro/claro** (consciente del sistema)
+- **Disponible en 4 idiomas:** Asturiano, Español, Inglés y Catalán
 
 ## Stack Tecnológico
 
