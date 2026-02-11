@@ -66,13 +66,14 @@ namespace Jot.ViewModels
      [ObservableProperty]
     private bool isGitHubConnected = false;
 
-      private ObservableCollection<Document> _allDocuments = new();
+          private ObservableCollection<Document> _allDocuments = new();
 
-     public ChatbotService ChatbotService => _chatbotService;
-        public PythonExecutionService PythonService => _pythonService;
-        public GitHubUploadService GitHubService => _gitHubService;
+          public ChatbotService ChatbotService => _chatbotService;
+             public PythonExecutionService PythonService => _pythonService;
+             public GitHubUploadService GitHubService => _gitHubService;
+             public DocumentService DocumentService => _documentService;
 
- public MainViewModel()
+      public MainViewModel()
         {
    _documentService = new DocumentService();
  _chatbotService = new ChatbotService(_documentService);

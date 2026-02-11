@@ -173,7 +173,86 @@ namespace Jot.Services
                     ["EmailSentError"] = "Error sending email. Please check your configuration.",
                     ["EnterEmail"] = "Please enter a valid email address.",
                     ["EmailClientOpened"] = "Email client opened successfully. Please complete sending from your email application.",
-                    ["EnterCredentials"] = "Please enter your email credentials (email and password)."
+                    ["EnterCredentials"] = "Please enter your email credentials (email and password).",
+                    ["PrintDocument"] = "Print Document",
+                    ["PrintError"] = "Error printing document. Please try again.",
+
+                    // 🔄 Version History
+                    ["VersionHistory"] = "Version History",
+                    ["Versions"] = "Versions",
+                    ["Restore"] = "Restore",
+                    ["Details"] = "Details",
+                    ["Preview"] = "Preview",
+                    ["CurrentVersion"] = "Current version",
+
+                    // 🔐 Encryption
+                    ["EncryptDocument"] = "Encrypt Document",
+                    ["UnlockDocument"] = "Unlock Document",
+                    ["ChangePassword"] = "Change Password",
+                    ["Encrypt"] = "Encrypt",
+                    ["Unlock"] = "Unlock",
+                    ["Change"] = "Change",
+                    ["CurrentPassword"] = "Current Password",
+                    ["NewPassword"] = "New Password",
+                    ["ConfirmPassword"] = "Confirm Password",
+                    ["PasswordsDoNotMatch"] = "Passwords do not match",
+                    ["EncryptDescription"] = "Protect your document with a strong password. Use AES-256 encryption.",
+                    ["UnlockDescription"] = "Enter your password to unlock and view this document.",
+                    ["ChangePasswordDescription"] = "Change the encryption password for this document.",
+                    ["EncryptionWarning"] = "⚠️ Remember your password! There is no way to recover it if you forget it.",
+                    ["EncryptionError"] = "Encryption error. Check your password and try again.",
+                    ["LockDocument"] = "Lock Document",
+
+                    // ☁️ Cloud Sync
+                    ["CloudSync"] = "Cloud Sync",
+                    ["CloudProvider"] = "Cloud Provider",
+                    ["AutoSync"] = "Auto Sync",
+                    ["Enabled"] = "Enabled",
+                    ["Disabled"] = "Disabled",
+                    ["LastSync"] = "Last sync",
+                    ["NeverSynced"] = "Never synced",
+                    ["SyncNow"] = "Sync Now",
+                    ["Syncing"] = "Syncing...",
+                    ["SelectProvider"] = "Select a cloud provider",
+                    ["SyncSuccess"] = "Synced successfully",
+                    ["SyncError"] = "Sync error",
+                    ["CloudSyncInfo"] = "Your document will be synchronized automatically with the selected cloud provider.",
+
+                    // 📸 OCR
+                    ["OCR"] = "OCR - Text Recognition",
+                    ["OCRDescription"] = "Extract text from images using optical character recognition.",
+                    ["OCRLanguage"] = "OCR Language",
+                    ["SelectImage"] = "Select Image",
+                    ["FromClipboard"] = "From Clipboard",
+                    ["ExtractedText"] = "Extracted Text",
+                    ["NoTextExtracted"] = "No text extracted yet...",
+                    ["ExtractingText"] = "Extracting text...",
+                    ["TextExtracted"] = "Text extracted successfully",
+                    ["NoImageInClipboard"] = "No image in clipboard",
+                    ["NoTextFound"] = "No text found in image",
+                    ["InsertText"] = "Insert Text",
+                    ["Characters"] = "characters",
+
+                    // 🔗 Document Links
+                    ["DocumentLinks"] = "Document Links",
+                    ["OutgoingLinks"] = "Outgoing Links",
+                    ["Backlinks"] = "Backlinks",
+                    ["RelatedDocuments"] = "Related Documents",
+                    ["BrokenLinks"] = "Broken Links",
+                    ["WikiLinkHelp"] = "Use [[Document Name]] to create links between documents",
+                    ["NoLinksFound"] = "No links found",
+                    ["NoBacklinksFound"] = "No backlinks found",
+                    ["NoRelatedFound"] = "No related documents found",
+                    ["DocumentNotFound"] = "Document not found",
+                    ["NoBrokenLinks"] = "No broken links",
+
+                    // 📎 Attachments
+                    ["Attachments"] = "Attachments",
+                    ["AddFile"] = "Add File",
+                    ["PasteImage"] = "Paste Image",
+                    ["SelectAttachment"] = "Select an attachment to preview",
+                    ["NoAttachments"] = "No attachments yet",
+                    ["OpenFile"] = "Open File"
                 },
                 ["es"] = new Dictionary<string, string>
                 {
@@ -299,7 +378,86 @@ namespace Jot.Services
                     ["EmailSentError"] = "Error al enviar email. Por favor verifica tu configuración.",
                     ["EnterEmail"] = "Por favor introduce una dirección de email válida.",
                     ["EmailClientOpened"] = "Cliente de correo abierto correctamente. Por favor completa el envío desde tu aplicación de correo.",
-                    ["EnterCredentials"] = "Por favor introduce tus credenciales de email (correo y contraseña)."
+                    ["EnterCredentials"] = "Por favor introduce tus credenciales de email (correo y contraseña).",
+                    ["PrintDocument"] = "Imprimir Documento",
+                    ["PrintError"] = "Error al imprimir el documento. Por favor intenta de nuevo.",
+
+                    // 🔄 Historial de Versiones
+                    ["VersionHistory"] = "Historial de Versiones",
+                    ["Versions"] = "Versiones",
+                    ["Restore"] = "Restaurar",
+                    ["Details"] = "Detalles",
+                    ["Preview"] = "Vista Previa",
+                    ["CurrentVersion"] = "Versión actual",
+
+                    // 🔐 Cifrado
+                    ["EncryptDocument"] = "Cifrar Documento",
+                    ["UnlockDocument"] = "Desbloquear Documento",
+                    ["ChangePassword"] = "Cambiar Contraseña",
+                    ["Encrypt"] = "Cifrar",
+                    ["Unlock"] = "Desbloquear",
+                    ["Change"] = "Cambiar",
+                    ["CurrentPassword"] = "Contraseña Actual",
+                    ["NewPassword"] = "Nueva Contraseña",
+                    ["ConfirmPassword"] = "Confirmar Contraseña",
+                    ["PasswordsDoNotMatch"] = "Las contraseñas no coinciden",
+                    ["EncryptDescription"] = "Protege tu documento con una contraseña segura. Usa cifrado AES-256.",
+                    ["UnlockDescription"] = "Introduce tu contraseña para desbloquear y ver este documento.",
+                    ["ChangePasswordDescription"] = "Cambia la contraseña de cifrado de este documento.",
+                    ["EncryptionWarning"] = "⚠️ ¡Recuerda tu contraseña! No hay forma de recuperarla si la olvidas.",
+                    ["EncryptionError"] = "Error de cifrado. Verifica tu contraseña e intenta de nuevo.",
+                    ["LockDocument"] = "Bloquear Documento",
+
+                    // ☁️ Sincronización
+                    ["CloudSync"] = "Sincronización en la Nube",
+                    ["CloudProvider"] = "Proveedor de Nube",
+                    ["AutoSync"] = "Sincronización Automática",
+                    ["Enabled"] = "Habilitado",
+                    ["Disabled"] = "Deshabilitado",
+                    ["LastSync"] = "Última sincronización",
+                    ["NeverSynced"] = "Nunca sincronizado",
+                    ["SyncNow"] = "Sincronizar Ahora",
+                    ["Syncing"] = "Sincronizando...",
+                    ["SelectProvider"] = "Selecciona un proveedor de nube",
+                    ["SyncSuccess"] = "Sincronizado correctamente",
+                    ["SyncError"] = "Error de sincronización",
+                    ["CloudSyncInfo"] = "Tu documento se sincronizará automáticamente con el proveedor de nube seleccionado.",
+
+                    // 📸 OCR
+                    ["OCR"] = "OCR - Reconocimiento de Texto",
+                    ["OCRDescription"] = "Extrae texto de imágenes usando reconocimiento óptico de caracteres.",
+                    ["OCRLanguage"] = "Idioma OCR",
+                    ["SelectImage"] = "Seleccionar Imagen",
+                    ["FromClipboard"] = "Desde Portapapeles",
+                    ["ExtractedText"] = "Texto Extraído",
+                    ["NoTextExtracted"] = "Aún no se ha extraído texto...",
+                    ["ExtractingText"] = "Extrayendo texto...",
+                    ["TextExtracted"] = "Texto extraído correctamente",
+                    ["NoImageInClipboard"] = "No hay imagen en el portapapeles",
+                    ["NoTextFound"] = "No se encontró texto en la imagen",
+                    ["InsertText"] = "Insertar Texto",
+                    ["Characters"] = "caracteres",
+
+                    // 🔗 Enlaces
+                    ["DocumentLinks"] = "Enlaces del Documento",
+                    ["OutgoingLinks"] = "Enlaces Salientes",
+                    ["Backlinks"] = "Retroenlaces",
+                    ["RelatedDocuments"] = "Documentos Relacionados",
+                    ["BrokenLinks"] = "Enlaces Rotos",
+                    ["WikiLinkHelp"] = "Usa [[Nombre Documento]] para crear enlaces entre documentos",
+                    ["NoLinksFound"] = "No se encontraron enlaces",
+                    ["NoBacklinksFound"] = "No se encontraron retroenlaces",
+                    ["NoRelatedFound"] = "No se encontraron documentos relacionados",
+                    ["DocumentNotFound"] = "Documento no encontrado",
+                    ["NoBrokenLinks"] = "No hay enlaces rotos",
+
+                    // 📎 Adjuntos
+                    ["Attachments"] = "Archivos Adjuntos",
+                    ["AddFile"] = "Agregar Archivo",
+                    ["PasteImage"] = "Pegar Imagen",
+                    ["SelectAttachment"] = "Selecciona un adjunto para previsualizar",
+                    ["NoAttachments"] = "Aún no hay adjuntos",
+                    ["OpenFile"] = "Abrir Archivo"
                 },
                 ["ca"] = new Dictionary<string, string>
                 {
@@ -425,7 +583,9 @@ namespace Jot.Services
                     ["EmailSentError"] = "Error en enviar email. Si us plau verifica la teva configuració.",
                     ["EnterEmail"] = "Si us plau introdueix una adreça d'email vàlida.",
                     ["EmailClientOpened"] = "Client de correu obert correctament. Si us plau completa l'enviament des de la teva aplicació de correu.",
-                    ["EnterCredentials"] = "Si us plau introdueix les teves credencials d'email (correu i contrasenya)."
+                    ["EnterCredentials"] = "Si us plau introdueix les teves credencials d'email (correu i contrasenya).",
+                    ["PrintDocument"] = "Imprimir Document",
+                    ["PrintError"] = "Error en imprimir el document. Si us plau torna-ho a intentar."
                 },
                 ["ast"] = new Dictionary<string, string>
                 {
@@ -551,7 +711,9 @@ namespace Jot.Services
                     ["EmailSentError"] = "Fallu al unviar email. Por favor verifica la to configuración.",
                     ["EnterEmail"] = "Por favor introduz una direición d'email válida.",
                     ["EmailClientOpened"] = "Cliente de correau abiertu correchu. Por favor completa l'unviamientu dende la to aplicación de correau.",
-                    ["EnterCredentials"] = "Por favor introduz les tos credenciales d'email (correau y contraseña)."
+                    ["EnterCredentials"] = "Por favor introduz les tos credenciales d'email (correau y contraseña).",
+                    ["PrintDocument"] = "Imprentar Documentu",
+                    ["PrintError"] = "Fallu al imprentar el documentu. Por favor inténtalo otra vuelta."
                 }
             };
         }

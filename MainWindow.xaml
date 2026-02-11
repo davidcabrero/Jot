@@ -60,6 +60,11 @@
                 ToolTipService.ToolTip="Export to HTML">
          <FontIcon Glyph="&#xE12B;" FontSize="16"/>
     </Button>
+                <Button Background="Transparent" BorderThickness="0"
+                        Click="PrintDocument_Click"
+                        ToolTipService.ToolTip="Print Document">
+                    <FontIcon Glyph="&#xE749;" FontSize="16"/>
+                </Button>
     <Border Width="1" Height="20" Background="{ThemeResource DividerStrokeColorDefaultBrush}" Margin="4,0"/>
       <Button Background="Transparent" BorderThickness="0"
         Click="OpenPythonDialog_Click"
@@ -128,6 +133,68 @@
                    Click="SendEmail_Click"
                    ToolTipService.ToolTip="Send by Email">
                <FontIcon Glyph="&#xE715;" FontSize="16"/>
+           </Button>
+
+           <!-- 🔄 Version History -->
+           <Button Background="Transparent" BorderThickness="0"
+                   Click="VersionHistory_Click"
+                   ToolTipService.ToolTip="Version History">
+               <FontIcon Glyph="&#xE81C;" FontSize="16"/>
+           </Button>
+
+           <!-- 🔐 Encryption -->
+           <Button x:Name="EncryptionButton" Background="Transparent" BorderThickness="0"
+                   ToolTipService.ToolTip="Encryption">
+               <Button.Flyout>
+                   <MenuFlyout>
+                       <MenuFlyoutItem Text="🔐 Encrypt Document" Click="EncryptDocument_Click">
+                           <MenuFlyoutItem.Icon>
+                               <FontIcon Glyph="&#xE72E;"/>
+                           </MenuFlyoutItem.Icon>
+                       </MenuFlyoutItem>
+                       <MenuFlyoutItem Text="🔓 Unlock Document" Click="UnlockDocument_Click">
+                           <MenuFlyoutItem.Icon>
+                               <FontIcon Glyph="&#xE785;"/>
+                           </MenuFlyoutItem.Icon>
+                       </MenuFlyoutItem>
+                       <MenuFlyoutItem Text="🔒 Lock Document" Click="LockDocument_Click">
+                           <MenuFlyoutItem.Icon>
+                               <FontIcon Glyph="&#xE72E;"/>
+                           </MenuFlyoutItem.Icon>
+                       </MenuFlyoutItem>
+                   </MenuFlyout>
+               </Button.Flyout>
+               <FontIcon Glyph="&#xE72E;" FontSize="16"/>
+           </Button>
+
+           <!-- ☁️ Cloud Sync -->
+           <Button Background="Transparent" BorderThickness="0"
+                   Click="CloudSync_Click"
+                   ToolTipService.ToolTip="Cloud Sync">
+               <FontIcon Glyph="&#xE753;" FontSize="16"/>
+           </Button>
+
+           <Border Width="1" Height="20" Background="{ThemeResource DividerStrokeColorDefaultBrush}" Margin="4,0"/>
+
+           <!-- 📸 OCR -->
+           <Button Background="Transparent" BorderThickness="0"
+                   Click="OCR_Click"
+                   ToolTipService.ToolTip="OCR - Text Recognition">
+               <FontIcon Glyph="&#xE8B3;" FontSize="16"/>
+           </Button>
+
+           <!-- 🔗 Document Links -->
+           <Button Background="Transparent" BorderThickness="0"
+                   Click="DocumentLinks_Click"
+                   ToolTipService.ToolTip="Document Links">
+               <FontIcon Glyph="&#xE71B;" FontSize="16"/>
+           </Button>
+
+           <!-- 📎 Attachments -->
+           <Button Background="Transparent" BorderThickness="0"
+                   Click="Attachments_Click"
+                   ToolTipService.ToolTip="Attachments">
+               <FontIcon Glyph="&#xE723;" FontSize="16"/>
            </Button>
  </StackPanel>
       </Grid>
@@ -303,12 +370,41 @@ Margin="6,0,0,0"
    <FontIcon Glyph="&#xE12B;"/>
      </MenuFlyoutItem.Icon>
                </MenuFlyoutItem>
+                        <MenuFlyoutItem Text="Print"
+                                        Click="PrintDocumentFromMenu_Click"
+                                        CommandParameter="{x:Bind}">
+                            <MenuFlyoutItem.Icon>
+                                <FontIcon Glyph="&#xE749;"/>
+                            </MenuFlyoutItem.Icon>
+                        </MenuFlyoutItem>
            <MenuFlyoutItem Text="Upload to GitHub"
    Click="UploadDocumentToGitHub_Click"
     CommandParameter="{x:Bind}">
          <MenuFlyoutItem.Icon>
        <FontIcon Glyph="&#xE89B;"/>
       </MenuFlyoutItem.Icon>
+     </MenuFlyoutItem>
+     <MenuFlyoutSeparator/>
+     <MenuFlyoutItem Text="🔄 Version History"
+                     Click="VersionHistoryFromMenu_Click"
+                     CommandParameter="{x:Bind}">
+         <MenuFlyoutItem.Icon>
+             <FontIcon Glyph="&#xE81C;"/>
+         </MenuFlyoutItem.Icon>
+     </MenuFlyoutItem>
+     <MenuFlyoutItem Text="🔗 Document Links"
+                     Click="DocumentLinksFromMenu_Click"
+                     CommandParameter="{x:Bind}">
+         <MenuFlyoutItem.Icon>
+             <FontIcon Glyph="&#xE71B;"/>
+         </MenuFlyoutItem.Icon>
+     </MenuFlyoutItem>
+     <MenuFlyoutItem Text="📎 Attachments"
+                     Click="AttachmentsFromMenu_Click"
+                     CommandParameter="{x:Bind}">
+         <MenuFlyoutItem.Icon>
+             <FontIcon Glyph="&#xE723;"/>
+         </MenuFlyoutItem.Icon>
      </MenuFlyoutItem>
      <MenuFlyoutSeparator/>
        <MenuFlyoutItem Text="Delete"

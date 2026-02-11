@@ -33,6 +33,7 @@
 - **Python**: Ejecuta código Python
 - **Github**: Sube tus documentos a la nube
 - **HTML**: Exporta tus documentos a HTML
+- **Imprime tus documentos**
 - **Soporte avanzado de Markdown** incluyendo:
   - Encabezados (H1-H6)
   - Listas (viñetas, numeradas, tareas)
@@ -55,6 +56,8 @@
 - **Diagramas Mermaid**: Vista previa de diagramas con tipos específicos (flowchart, sequence, gantt, pie)
 - **Emojis**: Selector integrado con 48+ emojis comunes
 - **Chatbot RAG**: Chatbot para hacer preguntas sobre el contenido del documento
+- **OCR Reconocimiento de texto**: Extrae el texto de las imágenes.
+- **Adjunta archivos a los documentos**
 
 ### **Gestión de Documentos**
 - **Crear, editar, guardar y eliminar documentos**
@@ -63,6 +66,8 @@
 - **Almacenamiento persistente** usando archivos JSON locales
 - **Biblioteca de documentos** con lista de documentos recientes
 - **Envía tus documentos por email**
+- **Historial de versiones y sincronización con la nube**
+- **Cifrado de documentos**
 
 ### **Navegación y Organización**
 - **Índice de Documento**: Tabla de contenidos auto-generada desde encabezados

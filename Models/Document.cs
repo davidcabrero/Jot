@@ -16,6 +16,28 @@ namespace Jot.Models
         public DocumentType Type { get; set; } = DocumentType.Markdown;
         public Dictionary<string, PythonCell> PythonCells { get; set; } = new Dictionary<string, PythonCell>();
         public List<string> AttachedImages { get; set; } = new List<string>();
+
+        // 🔄 Historial de Versiones
+        [JsonIgnore]
+        public List<DocumentVersion> VersionHistory { get; set; } = new List<DocumentVersion>();
+
+        // 🔐 Cifrado
+        public bool IsEncrypted { get; set; } = false;
+        public string EncryptedContent { get; set; } = "";
+        public string PasswordHash { get; set; } = ""; // SHA256 hash
+
+        // ☁️ Sincronización
+        public string CloudSyncId { get; set; } = "";
+        public DateTime? LastSyncedAt { get; set; }
+        public CloudProvider CloudProvider { get; set; } = CloudProvider.None;
+        public bool IsSyncEnabled { get; set; } = false;
+
+        // 📎 Archivos Adjuntos
+        public List<DocumentAttachment> Attachments { get; set; } = new List<DocumentAttachment>();
+
+        // 🔗 Enlaces entre Documentos
+        public List<string> LinkedDocumentIds { get; set; } = new List<string>(); // IDs de documentos enlazados
+        public List<string> BackLinks { get; set; } = new List<string>(); // IDs de documentos que enlazan a este
     }
 
     public enum DocumentType
@@ -24,6 +46,48 @@ namespace Jot.Models
         RichText,
         Code,
         Quiz
+    }
+
+    public enum CloudProvider
+    {
+        None,
+        OneDrive,
+        GoogleDrive,
+        Dropbox
+    }
+
+    // 🔄 Modelo de Versión
+    public class DocumentVersion
+    {
+        public Guid Id { get; set; } = Guid.NewGuid();
+        public string Title { get; set; } = "";
+        public string Content { get; set; } = "";
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public string CreatedBy { get; set; } = "User";
+        public string ChangeDescription { get; set; } = "Auto-saved version";
+        public long SizeInBytes { get; set; }
+    }
+
+    // 📎 Modelo de Adjunto
+    public class DocumentAttachment
+    {
+        public Guid Id { get; set; } = Guid.NewGuid();
+        public string FileName { get; set; } = "";
+        public string FilePath { get; set; } = ""; // Ruta local o URL
+        public AttachmentType Type { get; set; } = AttachmentType.File;
+        public long SizeInBytes { get; set; }
+        public DateTime AttachedAt { get; set; } = DateTime.Now;
+        public string MimeType { get; set; } = "";
+    }
+
+    public enum AttachmentType
+    {
+        File,
+        Image,
+        Audio,
+        Video,
+        Pdf,
+        Link
     }
 
     public class PythonCell

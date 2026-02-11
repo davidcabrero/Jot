@@ -11,22 +11,40 @@ namespace Jot.Services
     public class DocumentService
     {
         private readonly string _documentsFolder;
+        private readonly VersionHistoryService _versionHistoryService;
+        private readonly EncryptionService _encryptionService;
+        private readonly CloudSyncService _cloudSyncService;
+        private readonly DocumentLinksService _documentLinksService;
+        private readonly AttachmentService _attachmentService;
 
         public DocumentService()
         {
             var localFolder = ApplicationData.Current.LocalFolder.Path;
             _documentsFolder = Path.Combine(localFolder, "Documents");
             Directory.CreateDirectory(_documentsFolder);
+
+            // Inicializar servicios avanzados
+            _versionHistoryService = new VersionHistoryService();
+            _encryptionService = new EncryptionService();
+            _cloudSyncService = new CloudSyncService();
+            _documentLinksService = new DocumentLinksService();
+            _attachmentService = new AttachmentService();
         }
+
+        public VersionHistoryService VersionHistory => _versionHistoryService;
+        public EncryptionService Encryption => _encryptionService;
+        public CloudSyncService CloudSync => _cloudSyncService;
+        public DocumentLinksService DocumentLinks => _documentLinksService;
+        public AttachmentService Attachments => _attachmentService;
 
         public async Task<List<Document>> LoadAllDocumentsAsync()
         {
             var documents = new List<Document>();
-            
+
             try
             {
                 var files = Directory.GetFiles(_documentsFolder, "*.json");
-                
+
                 foreach (var file in files)
                 {
                     var content = await File.ReadAllTextAsync(file);
@@ -36,9 +54,12 @@ namespace Jot.Services
                         documents.Add(document);
                     }
                 }
-                
+
                 // Sort by modified date, most recent first
                 documents.Sort((a, b) => b.ModifiedAt.CompareTo(a.ModifiedAt));
+
+                // Actualizar backlinks
+                _documentLinksService.UpdateAllBacklinks(documents);
             }
             catch (Exception ex)
             {
@@ -53,6 +74,22 @@ namespace Jot.Services
         {
             try
             {
+                document.ModifiedAt = DateTime.Now;
+
+                // Auto-guardar versión si ha pasado suficiente tiempo
+                var versions = await _versionHistoryService.GetVersionHistoryAsync(document.Id);
+                if (versions.Count == 0 || 
+                    (DateTime.Now - versions[0].CreatedAt).TotalMinutes >= 5)
+                {
+                    await _versionHistoryService.SaveVersionAsync(document, "Auto-save");
+                }
+
+                // Sincronizar con la nube si está habilitado
+                if (document.IsSyncEnabled)
+                {
+                    await _cloudSyncService.SyncDocumentAsync(document);
+                }
+
                 var filePath = Path.Combine(_documentsFolder, $"{document.Id}.json");
                 var json = JsonConvert.SerializeObject(document, Formatting.Indented);
                 await File.WriteAllTextAsync(filePath, json);
@@ -68,6 +105,10 @@ namespace Jot.Services
         {
             try
             {
+                // Eliminar historial de versiones
+                await _versionHistoryService.DeleteVersionHistoryAsync(documentId);
+
+                // Eliminar archivo
                 var filePath = Path.Combine(_documentsFolder, $"{documentId}.json");
                 if (File.Exists(filePath))
                 {
@@ -98,6 +139,12 @@ namespace Jot.Services
             }
 
             return null;
+        }
+
+        public async Task UpdateDocumentLinksAsync(Document document, List<Document> allDocuments)
+        {
+            _documentLinksService.UpdateDocumentLinks(document, allDocuments);
+            _documentLinksService.UpdateAllBacklinks(allDocuments);
         }
     }
 }

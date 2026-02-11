@@ -1706,6 +1706,90 @@ System.Diagnostics.Debug.WriteLine("Pomodoro session started: 25 minutes");
             }
         }
 
+        private async void PrintDocument_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (ViewModel.SelectedDocument == null)
+                {
+                    var noDocDialog = new ContentDialog
+                    {
+                        Title = "⚠️ " + LocalizationService.Instance.GetString("Warning"),
+                        Content = LocalizationService.Instance.GetString("NoDocumentSelected"),
+                        CloseButtonText = "OK",
+                        XamlRoot = this.Content.XamlRoot
+                    };
+                    await noDocDialog.ShowAsync();
+                    return;
+                }
+
+                var printService = new Services.PrintService();
+                var success = await printService.PrintDocumentAsync(ViewModel.SelectedDocument);
+
+                if (!success)
+                {
+                    var errorDialog = new ContentDialog
+                    {
+                        Title = "❌ Error",
+                        Content = LocalizationService.Instance.GetString("PrintError"),
+                        CloseButtonText = "OK",
+                        XamlRoot = this.Content.XamlRoot
+                    };
+                    await errorDialog.ShowAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error printing document: {ex.Message}");
+
+                var errorDialog = new ContentDialog
+                {
+                    Title = "❌ Error",
+                    Content = $"Error: {ex.Message}",
+                    CloseButtonText = "OK",
+                    XamlRoot = this.Content.XamlRoot
+                };
+                await errorDialog.ShowAsync();
+            }
+        }
+
+        private async void PrintDocumentFromMenu_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (sender is MenuFlyoutItem menuItem && menuItem.CommandParameter is Models.Document document)
+                {
+                    var printService = new Services.PrintService();
+                    var success = await printService.PrintDocumentAsync(document);
+
+                    if (!success)
+                    {
+                        var errorDialog = new ContentDialog
+                        {
+                            Title = "❌ Error",
+                            Content = LocalizationService.Instance.GetString("PrintError"),
+                            CloseButtonText = "OK",
+                            XamlRoot = this.Content.XamlRoot
+                        };
+                        await errorDialog.ShowAsync();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error printing document from menu: {ex.Message}");
+
+                var errorDialog = new ContentDialog
+                {
+                    Title = "❌ Error",
+                    Content = $"Error: {ex.Message}",
+                    CloseButtonText = "OK",
+                    XamlRoot = this.Content.XamlRoot
+                };
+                await errorDialog.ShowAsync();
+            }
+        }
+
  private void OpenPythonDialog_Click(object sender, RoutedEventArgs e)
    {
             ViewModel.OpenPythonDialogCommand.Execute(null);
@@ -2321,10 +2405,10 @@ foreach (var heading in headings)
     _pomodoroTimer?.Stop();
        _wordCountTimer?.Stop();
           _typingTimer?.Stop();
-         
+
 SaveUserPreferences();
       SaveWritingStats();
-         
+
       System.Diagnostics.Debug.WriteLine("Resources cleaned up successfully");
    }
  catch (Exception ex)
@@ -2332,6 +2416,255 @@ SaveUserPreferences();
       System.Diagnostics.Debug.WriteLine($"Error during cleanup: {ex.Message}");
        }
    }
+
+        #region Advanced Features Event Handlers
+
+        // ============================================
+        // 🔄 VERSION HISTORY
+        // ============================================
+
+        private async void VersionHistory_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (ViewModel.SelectedDocument == null)
+                {
+                    await ShowNoDocumentSelectedDialog();
+                    return;
+                }
+
+                var dialog = new Dialogs.VersionHistoryDialog(
+                    ViewModel.SelectedDocument,
+                    ViewModel.DocumentService.VersionHistory
+                );
+                dialog.XamlRoot = this.Content.XamlRoot;
+
+                var result = await dialog.ShowAsync();
+
+                if (result == ContentDialogResult.Primary && dialog.SelectedVersionToRestore != null)
+                {
+                    await ViewModel.DocumentService.VersionHistory.RestoreVersionAsync(
+                        ViewModel.SelectedDocument,
+                        dialog.SelectedVersionToRestore
+                    );
+
+                    _isUpdatingContent = true;
+                    TextEditor.Text = ViewModel.SelectedDocument.Content;
+                    TitleTextBox.Text = ViewModel.SelectedDocument.Title;
+                    _isUpdatingContent = false;
+
+                    UpdatePreviewContent();
+                    await ViewModel.DocumentService.SaveDocumentAsync(ViewModel.SelectedDocument);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error with version history: {ex.Message}");
+            }
+        }
+
+        private async void VersionHistoryFromMenu_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is MenuFlyoutItem menuItem && menuItem.CommandParameter is Models.Document document)
+            {
+                var dialog = new Dialogs.VersionHistoryDialog(
+                    document,
+                    ViewModel.DocumentService.VersionHistory
+                );
+                dialog.XamlRoot = this.Content.XamlRoot;
+                await dialog.ShowAsync();
+            }
+        }
+
+        // ============================================
+        // 🔐 ENCRYPTION
+        // ============================================
+
+        private async void EncryptDocument_Click(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel.SelectedDocument == null || ViewModel.SelectedDocument.IsEncrypted) return;
+
+            var dialog = new Dialogs.EncryptionDialog(
+                ViewModel.SelectedDocument,
+                ViewModel.DocumentService.Encryption,
+                Dialogs.EncryptionDialog.EncryptionMode.Encrypt
+            );
+            dialog.XamlRoot = this.Content.XamlRoot;
+
+            if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+            {
+                _isUpdatingContent = true;
+                TextEditor.Text = ViewModel.SelectedDocument.Content;
+                _isUpdatingContent = false;
+                await ViewModel.DocumentService.SaveDocumentAsync(ViewModel.SelectedDocument);
+            }
+        }
+
+        private async void UnlockDocument_Click(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel.SelectedDocument == null || !ViewModel.SelectedDocument.IsEncrypted) return;
+
+            var dialog = new Dialogs.EncryptionDialog(
+                ViewModel.SelectedDocument,
+                ViewModel.DocumentService.Encryption,
+                Dialogs.EncryptionDialog.EncryptionMode.Decrypt
+            );
+            dialog.XamlRoot = this.Content.XamlRoot;
+
+            if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+            {
+                _isUpdatingContent = true;
+                TextEditor.Text = ViewModel.SelectedDocument.Content;
+                _isUpdatingContent = false;
+                UpdatePreviewContent();
+            }
+        }
+
+        private async void LockDocument_Click(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel.SelectedDocument == null || !ViewModel.SelectedDocument.IsEncrypted) return;
+
+            await ViewModel.DocumentService.Encryption.LockDocumentAsync(ViewModel.SelectedDocument, "");
+            _isUpdatingContent = true;
+            TextEditor.Text = ViewModel.SelectedDocument.Content;
+            _isUpdatingContent = false;
+            await ViewModel.DocumentService.SaveDocumentAsync(ViewModel.SelectedDocument);
+        }
+
+        // ============================================
+        // ☁️ CLOUD SYNC
+        // ============================================
+
+        private async void CloudSync_Click(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel.SelectedDocument == null) return;
+
+            var dialog = new Dialogs.CloudSyncDialog(
+                ViewModel.SelectedDocument,
+                ViewModel.DocumentService.CloudSync
+            );
+            dialog.XamlRoot = this.Content.XamlRoot;
+
+            if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+            {
+                await ViewModel.DocumentService.SaveDocumentAsync(ViewModel.SelectedDocument);
+            }
+        }
+
+        // ============================================
+        // 📸 OCR
+        // ============================================
+
+        private async void OCR_Click(object sender, RoutedEventArgs e)
+        {
+            var ocrService = new OcrService();
+            var dialog = new Dialogs.OcrDialog(ocrService);
+            dialog.XamlRoot = this.Content.XamlRoot;
+
+            if (await dialog.ShowAsync() == ContentDialogResult.Primary && !string.IsNullOrEmpty(dialog.ExtractedText))
+            {
+                if (ViewModel.SelectedDocument != null)
+                {
+                    InsertTextAtCursor("\n\n" + dialog.ExtractedText);
+                }
+                else
+                {
+                    ViewModel.CreateNewDocumentCommand.Execute(null);
+                    await Task.Delay(100);
+                    if (ViewModel.SelectedDocument != null)
+                    {
+                        ViewModel.SelectedDocument.Title = "OCR Extracted Text";
+                        ViewModel.SelectedDocument.Content = dialog.ExtractedText;
+                        TextEditor.Text = dialog.ExtractedText;
+                    }
+                }
+            }
+        }
+
+        // ============================================
+        // 🔗 DOCUMENT LINKS
+        // ============================================
+
+        private async void DocumentLinks_Click(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel.SelectedDocument == null) return;
+
+            var allDocs = await ViewModel.DocumentService.LoadAllDocumentsAsync();
+            var dialog = new Dialogs.DocumentLinksDialog(
+                ViewModel.SelectedDocument,
+                allDocs,
+                ViewModel.DocumentService.DocumentLinks
+            );
+            dialog.XamlRoot = this.Content.XamlRoot;
+
+            await dialog.ShowAsync();
+
+            if (dialog.SelectedDocument != null)
+            {
+                ViewModel.SelectedDocument = dialog.SelectedDocument;
+            }
+        }
+
+        private async void DocumentLinksFromMenu_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is MenuFlyoutItem menuItem && menuItem.CommandParameter is Models.Document document)
+            {
+                var allDocs = await ViewModel.DocumentService.LoadAllDocumentsAsync();
+                var dialog = new Dialogs.DocumentLinksDialog(
+                    document,
+                    allDocs,
+                    ViewModel.DocumentService.DocumentLinks
+                );
+                dialog.XamlRoot = this.Content.XamlRoot;
+                await dialog.ShowAsync();
+            }
+        }
+
+        // ============================================
+        // 📎 ATTACHMENTS
+        // ============================================
+
+        private async void Attachments_Click(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel.SelectedDocument == null) return;
+
+            var dialog = new Dialogs.AttachmentsDialog(
+                ViewModel.SelectedDocument,
+                ViewModel.DocumentService.Attachments
+            );
+            dialog.XamlRoot = this.Content.XamlRoot;
+
+            await dialog.ShowAsync();
+            await ViewModel.DocumentService.SaveDocumentAsync(ViewModel.SelectedDocument);
+        }
+
+        private async void AttachmentsFromMenu_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is MenuFlyoutItem menuItem && menuItem.CommandParameter is Models.Document document)
+            {
+                var dialog = new Dialogs.AttachmentsDialog(
+                    document,
+                    ViewModel.DocumentService.Attachments
+                );
+                dialog.XamlRoot = this.Content.XamlRoot;
+                await dialog.ShowAsync();
+                await ViewModel.DocumentService.SaveDocumentAsync(document);
+            }
+        }
+
+        private async Task ShowNoDocumentSelectedDialog()
+        {
+            var dialog = new ContentDialog
+            {
+                Title = "⚠️ " + LocalizationService.Instance.GetString("Warning"),
+                Content = LocalizationService.Instance.GetString("NoDocumentSelected"),
+                CloseButtonText = "OK",
+                XamlRoot = this.Content.XamlRoot
+            };
+            await dialog.ShowAsync();
+        }
+
+        #endregion
     }
 
     public class DocumentHeading
