@@ -73,6 +73,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Plugins\BuiltIn\" />
     <Folder Include="Strings\ast\" />
     <Folder Include="Strings\ca\" />
     <Folder Include="Strings\es\" />

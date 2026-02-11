@@ -45,7 +45,7 @@ namespace Jot.Services
             }
         }
 
-    private string GenerateHtmlFromDocument(Jot.Models.Document document)
+    public string GenerateHtmlFromDocument(Jot.Models.Document document)
         {
  var html = new StringBuilder();
             

@@ -1644,6 +1644,47 @@ System.Diagnostics.Debug.WriteLine("Pomodoro session started: 25 minutes");
       ViewModel.OpenChatbotCommand.Execute(null);
         }
 
+        private async void SendEmail_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (ViewModel.SelectedDocument == null)
+                {
+                    var noDocDialog = new ContentDialog
+                    {
+                        Title = "⚠️ " + LocalizationService.Instance.GetString("Warning"),
+                        Content = LocalizationService.Instance.GetString("NoDocumentSelected"),
+                        CloseButtonText = "OK",
+                        XamlRoot = this.Content.XamlRoot
+                    };
+                    await noDocDialog.ShowAsync();
+                    return;
+                }
+
+                var emailDialog = new Dialogs.SendEmailDialog(ViewModel.SelectedDocument);
+                emailDialog.XamlRoot = this.Content.XamlRoot;
+
+                // El diálogo ahora maneja el envío internamente
+                await emailDialog.ShowAsync();
+            }
+            catch (Exception ex)
+            {
+                LoadingOverlay.Visibility = Visibility.Collapsed;
+
+                var errorDialog = new ContentDialog
+                {
+                    Title = "❌ Error",
+                    Content = $"Error: {ex.Message}",
+                    CloseButtonText = "OK",
+                    XamlRoot = this.Content.XamlRoot
+                };
+                await errorDialog.ShowAsync();
+
+                System.Diagnostics.Debug.WriteLine($"Error in SendEmail_Click: {ex.Message}");
+            }
+        }
+
+
  private void ExportToHtml_Click(object sender, RoutedEventArgs e)
         {
    ViewModel.ExportCurrentDocumentToHtmlCommand.Execute(null);

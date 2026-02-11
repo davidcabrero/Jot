@@ -62,6 +62,7 @@
 - **Búsqueda de documentos** por título y contenido
 - **Almacenamiento persistente** usando archivos JSON locales
 - **Biblioteca de documentos** con lista de documentos recientes
+- **Envía tus documentos por email**
 
 ### **Navegación y Organización**
 - **Índice de Documento**: Tabla de contenidos auto-generada desde encabezados
