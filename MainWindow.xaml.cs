@@ -317,35 +317,47 @@ private DispatcherTimer _autoSaveTimer;
                 // Identificar botones por nombre
                 if (button.Name == "QuickGitHubUploadButton")
                 {
-                    tooltip = LocalizationService.Instance.GetString("QuickUploadToGitHub");
+                    tooltip = LocalizationService.Instance.GetString("TooltipGitHubUpload");
                 }
                 else if (button.Name == "LanguageButton")
                 {
-                    tooltip = LocalizationService.Instance.GetString("Language");
+                    tooltip = LocalizationService.Instance.GetString("TooltipLanguage");
                 }
                 else if (button.Name == "TogglePaneButton")
                 {
                     tooltip = LocalizationService.Instance.GetString("ToggleSidebar");
+                }
+                else if (button.Name == "EncryptionButton")
+                {
+                    tooltip = LocalizationService.Instance.GetString("TooltipEncryption");
                 }
                 // Identificar por contenido
                 else if (button.Content is FontIcon icon)
                 {
                     tooltip = icon.Glyph switch
                     {
-                        "\uE710" => LocalizationService.Instance.GetString("NewDocument"),
-                        "\uE74E" => LocalizationService.Instance.GetString("SaveDocument"),
-                        "\uE12B" => LocalizationService.Instance.GetString("ExportToHtml"),
-                        "\uE943" => LocalizationService.Instance.GetString("PythonCodeExecution"),
-                        "\uE8F7" => LocalizationService.Instance.GetString("GitHubSettings"),
-                        "\uE8F2" => LocalizationService.Instance.GetString("AIAssistant"),
-                        "\uE774" => LocalizationService.Instance.GetString("Language"),
+                        "\uE710" => LocalizationService.Instance.GetString("TooltipNewDocument"),
+                        "\uE74E" => LocalizationService.Instance.GetString("TooltipSave"),
+                        "\uE12B" => LocalizationService.Instance.GetString("TooltipExportHTML"),
+                        "\uE749" => LocalizationService.Instance.GetString("TooltipPrint"),
+                        "\uE943" => LocalizationService.Instance.GetString("TooltipPython"),
+                        "\uE8F7" => LocalizationService.Instance.GetString("TooltipGitHubSettings"),
+                        "\uE8F2" => LocalizationService.Instance.GetString("TooltipAIAssistant"),
+                        "\uE774" => LocalizationService.Instance.GetString("TooltipLanguage"),
+                        "\uE715" => LocalizationService.Instance.GetString("TooltipSendEmail"),
+                        "\uE81C" => LocalizationService.Instance.GetString("TooltipVersionHistory"),
+                        "\uE72E" => LocalizationService.Instance.GetString("TooltipEncryption"),
+                        "\uE753" => LocalizationService.Instance.GetString("TooltipCloudSync"),
+                        "\uE8B3" => LocalizationService.Instance.GetString("TooltipOCR"),
+                        "\uE71B" => LocalizationService.Instance.GetString("TooltipDocumentLinks"),
+                        "\uE723" => LocalizationService.Instance.GetString("TooltipAttachments"),
                         _ => null
                     };
                 }
                 else if (button.Content is StackPanel stackPanel)
                 {
                     if (button.Name == "QuickGitHubUploadButton")
-                        tooltip = LocalizationService.Instance.GetString("QuickUploadToGitHub");
+                        tooltip = LocalizationService.Instance.GetString("TooltipGitHubUpload");
                 }
 
                 if (!string.IsNullOrEmpty(tooltip))

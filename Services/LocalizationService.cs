@@ -252,7 +252,25 @@ namespace Jot.Services
                     ["PasteImage"] = "Paste Image",
                     ["SelectAttachment"] = "Select an attachment to preview",
                     ["NoAttachments"] = "No attachments yet",
-                    ["OpenFile"] = "Open File"
+                    ["OpenFile"] = "Open File",
+
+                    // 🔧 Tooltips
+                    ["TooltipNewDocument"] = "New Document",
+                    ["TooltipSave"] = "Save",
+                    ["TooltipExportHTML"] = "Export to HTML",
+                    ["TooltipPrint"] = "Print Document",
+                    ["TooltipPython"] = "Python Code Execution",
+                    ["TooltipGitHubUpload"] = "Quick Upload to GitHub",
+                    ["TooltipGitHubSettings"] = "GitHub Settings",
+                    ["TooltipLanguage"] = "Language / Idioma",
+                    ["TooltipAIAssistant"] = "AI Assistant",
+                    ["TooltipSendEmail"] = "Send by Email",
+                    ["TooltipVersionHistory"] = "Version History",
+                    ["TooltipEncryption"] = "Encryption",
+                    ["TooltipCloudSync"] = "Cloud Sync",
+                    ["TooltipOCR"] = "OCR - Text Recognition",
+                    ["TooltipDocumentLinks"] = "Document Links",
+                    ["TooltipAttachments"] = "Attachments"
                 },
                 ["es"] = new Dictionary<string, string>
                 {
@@ -457,7 +475,25 @@ namespace Jot.Services
                     ["PasteImage"] = "Pegar Imagen",
                     ["SelectAttachment"] = "Selecciona un adjunto para previsualizar",
                     ["NoAttachments"] = "Aún no hay adjuntos",
-                    ["OpenFile"] = "Abrir Archivo"
+                    ["OpenFile"] = "Abrir Archivo",
+
+                    // 🔧 Tooltips
+                    ["TooltipNewDocument"] = "Nuevo Documento",
+                    ["TooltipSave"] = "Guardar",
+                    ["TooltipExportHTML"] = "Exportar a HTML",
+                    ["TooltipPrint"] = "Imprimir Documento",
+                    ["TooltipPython"] = "Ejecución de Código Python",
+                    ["TooltipGitHubUpload"] = "Subida Rápida a GitHub",
+                    ["TooltipGitHubSettings"] = "Configuración de GitHub",
+                    ["TooltipLanguage"] = "Idioma / Language",
+                    ["TooltipAIAssistant"] = "Asistente IA",
+                    ["TooltipSendEmail"] = "Enviar por Correo",
+                    ["TooltipVersionHistory"] = "Historial de Versiones",
+                    ["TooltipEncryption"] = "Cifrado",
+                    ["TooltipCloudSync"] = "Sincronización en la Nube",
+                    ["TooltipOCR"] = "OCR - Reconocimiento de Texto",
+                    ["TooltipDocumentLinks"] = "Enlaces del Documento",
+                    ["TooltipAttachments"] = "Archivos Adjuntos"
                 },
                 ["ca"] = new Dictionary<string, string>
                 {
@@ -585,7 +621,102 @@ namespace Jot.Services
                     ["EmailClientOpened"] = "Client de correu obert correctament. Si us plau completa l'enviament des de la teva aplicació de correu.",
                     ["EnterCredentials"] = "Si us plau introdueix les teves credencials d'email (correu i contrasenya).",
                     ["PrintDocument"] = "Imprimir Document",
-                    ["PrintError"] = "Error en imprimir el document. Si us plau torna-ho a intentar."
+                    ["PrintError"] = "Error en imprimir el document. Si us plau torna-ho a intentar.",
+
+                    // 🔄 Historial de Versions
+                    ["VersionHistory"] = "Historial de Versions",
+                    ["Versions"] = "Versions",
+                    ["Restore"] = "Restaurar",
+                    ["Details"] = "Detalls",
+                    ["Preview"] = "Vista Prèvia",
+                    ["CurrentVersion"] = "Versió actual",
+
+                    // 🔐 Xifrat
+                    ["EncryptDocument"] = "Xifrar Document",
+                    ["UnlockDocument"] = "Desbloquejar Document",
+                    ["ChangePassword"] = "Canviar Contrasenya",
+                    ["Encrypt"] = "Xifrar",
+                    ["Unlock"] = "Desbloquejar",
+                    ["Change"] = "Canviar",
+                    ["CurrentPassword"] = "Contrasenya Actual",
+                    ["NewPassword"] = "Nova Contrasenya",
+                    ["ConfirmPassword"] = "Confirmar Contrasenya",
+                    ["PasswordsDoNotMatch"] = "Les contrasenyes no coincideixen",
+                    ["EncryptDescription"] = "Protegeix el teu document amb una contrasenya segura. Usa xifratge AES-256.",
+                    ["UnlockDescription"] = "Introdueix la teva contrasenya per desbloquejar i veure aquest document.",
+                    ["ChangePasswordDescription"] = "Canvia la contrasenya de xifratge d'aquest document.",
+                    ["EncryptionWarning"] = "⚠️ Recorda la teva contrasenya! No hi ha manera de recuperar-la si l'oblides.",
+                    ["EncryptionError"] = "Error de xifratge. Verifica la teva contrasenya i torna-ho a intentar.",
+                    ["LockDocument"] = "Bloquejar Document",
+
+                    // ☁️ Sincronització
+                    ["CloudSync"] = "Sincronització al Núvol",
+                    ["CloudProvider"] = "Proveïdor de Núvol",
+                    ["AutoSync"] = "Sincronització Automàtica",
+                    ["Enabled"] = "Activat",
+                    ["Disabled"] = "Desactivat",
+                    ["LastSync"] = "Última sincronització",
+                    ["NeverSynced"] = "Mai sincronitzat",
+                    ["SyncNow"] = "Sincronitzar Ara",
+                    ["Syncing"] = "Sincronitzant...",
+                    ["SelectProvider"] = "Selecciona un proveïdor de núvol",
+                    ["SyncSuccess"] = "Sincronitzat correctament",
+                    ["SyncError"] = "Error de sincronització",
+                    ["CloudSyncInfo"] = "El teu document se sincronitzarà automàticament amb el proveïdor de núvol seleccionat.",
+
+                    // 📸 OCR
+                    ["OCR"] = "OCR - Reconeixement de Text",
+                    ["OCRDescription"] = "Extreu text d'imatges usant reconeixement òptic de caràcters.",
+                    ["OCRLanguage"] = "Idioma OCR",
+                    ["SelectImage"] = "Seleccionar Imatge",
+                    ["FromClipboard"] = "Des del Porta-retalls",
+                    ["ExtractedText"] = "Text Extret",
+                    ["NoTextExtracted"] = "Encara no s'ha extret text...",
+                    ["ExtractingText"] = "Extraient text...",
+                    ["TextExtracted"] = "Text extret correctament",
+                    ["NoImageInClipboard"] = "No hi ha imatge al porta-retalls",
+                    ["NoTextFound"] = "No s'ha trobat text a la imatge",
+                    ["InsertText"] = "Inserir Text",
+                    ["Characters"] = "caràcters",
+
+                    // 🔗 Enllaços
+                    ["DocumentLinks"] = "Enllaços del Document",
+                    ["OutgoingLinks"] = "Enllaços Sortints",
+                    ["Backlinks"] = "Retroenllaços",
+                    ["RelatedDocuments"] = "Documents Relacionats",
+                    ["BrokenLinks"] = "Enllaços Trencats",
+                    ["WikiLinkHelp"] = "Usa [[Nom Document]] per crear enllaços entre documents",
+                    ["NoLinksFound"] = "No s'han trobat enllaços",
+                    ["NoBacklinksFound"] = "No s'han trobat retroenllaços",
+                    ["NoRelatedFound"] = "No s'han trobat documents relacionats",
+                    ["DocumentNotFound"] = "Document no trobat",
+                    ["NoBrokenLinks"] = "No hi ha enllaços trencats",
+
+                    // 📎 Adjunts
+                    ["Attachments"] = "Fitxers Adjunts",
+                    ["AddFile"] = "Afegir Fitxer",
+                    ["PasteImage"] = "Enganxar Imatge",
+                    ["SelectAttachment"] = "Selecciona un adjunt per previsualitzar",
+                    ["NoAttachments"] = "Encara no hi ha adjunts",
+                    ["OpenFile"] = "Obrir Fitxer",
+
+                    // 🔧 Tooltips
+                    ["TooltipNewDocument"] = "Nou Document",
+                    ["TooltipSave"] = "Desar",
+                    ["TooltipExportHTML"] = "Exportar a HTML",
+                    ["TooltipPrint"] = "Imprimir Document",
+                    ["TooltipPython"] = "Execució de Codi Python",
+                    ["TooltipGitHubUpload"] = "Pujada Ràpida a GitHub",
+                    ["TooltipGitHubSettings"] = "Configuració de GitHub",
+                    ["TooltipLanguage"] = "Idioma / Language",
+                    ["TooltipAIAssistant"] = "Assistent IA",
+                    ["TooltipSendEmail"] = "Enviar per Correu",
+                    ["TooltipVersionHistory"] = "Historial de Versions",
+                    ["TooltipEncryption"] = "Xifrat",
+                    ["TooltipCloudSync"] = "Sincronització al Núvol",
+                    ["TooltipOCR"] = "OCR - Reconeixement de Text",
+                    ["TooltipDocumentLinks"] = "Enllaços del Document",
+                    ["TooltipAttachments"] = "Fitxers Adjunts"
                 },
                 ["ast"] = new Dictionary<string, string>
                 {
@@ -713,7 +844,102 @@ namespace Jot.Services
                     ["EmailClientOpened"] = "Cliente de correau abiertu correchu. Por favor completa l'unviamientu dende la to aplicación de correau.",
                     ["EnterCredentials"] = "Por favor introduz les tos credenciales d'email (correau y contraseña).",
                     ["PrintDocument"] = "Imprentar Documentu",
-                    ["PrintError"] = "Fallu al imprentar el documentu. Por favor inténtalo otra vuelta."
+                    ["PrintError"] = "Fallu al imprentar el documentu. Por favor inténtalo otra vuelta.",
+
+                    // 🔄 Historial de Versiones
+                    ["VersionHistory"] = "Historial de Versiones",
+                    ["Versions"] = "Versiones",
+                    ["Restore"] = "Restaurar",
+                    ["Details"] = "Detalles",
+                    ["Preview"] = "Vista Previa",
+                    ["CurrentVersion"] = "Versión actual",
+
+                    // 🔐 Cifráu
+                    ["EncryptDocument"] = "Cifrar Documentu",
+                    ["UnlockDocument"] = "Desbloquiar Documentu",
+                    ["ChangePassword"] = "Camudar Contraseña",
+                    ["Encrypt"] = "Cifrar",
+                    ["Unlock"] = "Desbloquiar",
+                    ["Change"] = "Camudar",
+                    ["CurrentPassword"] = "Contraseña Actual",
+                    ["NewPassword"] = "Contraseña Nueva",
+                    ["ConfirmPassword"] = "Confirmar Contraseña",
+                    ["PasswordsDoNotMatch"] = "Les contraseñes nun coinciden",
+                    ["EncryptDescription"] = "Protexe'l to documentu con una contraseña segura. Usa cifráu AES-256.",
+                    ["UnlockDescription"] = "Introduz la to contraseña pa desbloquiar y ver esti documentu.",
+                    ["ChangePasswordDescription"] = "Camuda la contraseña de cifráu d'esti documentu.",
+                    ["EncryptionWarning"] = "⚠️ ¡Recuerda la to contraseña! Nun hai manera de recuperala si la escaeces.",
+                    ["EncryptionError"] = "Fallu de cifráu. Verifica la to contraseña ya inténtalo otra vuelta.",
+                    ["LockDocument"] = "Bloquiar Documentu",
+
+                    // ☁️ Sincronización
+                    ["CloudSync"] = "Sincronización na Ñube",
+                    ["CloudProvider"] = "Fornidor de Ñube",
+                    ["AutoSync"] = "Sincronización Automática",
+                    ["Enabled"] = "Activáu",
+                    ["Disabled"] = "Desactiváu",
+                    ["LastSync"] = "Última sincronización",
+                    ["NeverSynced"] = "Enxamás sincronizáu",
+                    ["SyncNow"] = "Sincronizar Agora",
+                    ["Syncing"] = "Sincronizando...",
+                    ["SelectProvider"] = "Escueyi un fornidor de ñube",
+                    ["SyncSuccess"] = "Sincronizáu correchu",
+                    ["SyncError"] = "Fallu de sincronización",
+                    ["CloudSyncInfo"] = "El to documentu sincronizaráse automáticamente col fornidor de ñube escoyíu.",
+
+                    // 📸 OCR
+                    ["OCR"] = "OCR - Reconocimientu de Testu",
+                    ["OCRDescription"] = "Estrayi testu d'imáxenes usando reconocimientu ópticu de carauteres.",
+                    ["OCRLanguage"] = "Idioma OCR",
+                    ["SelectImage"] = "Esbillar Imaxe",
+                    ["FromClipboard"] = "Dende'l Porta-retayos",
+                    ["ExtractedText"] = "Testu Estrayíu",
+                    ["NoTextExtracted"] = "Entá nun s'estrayó testu...",
+                    ["ExtractingText"] = "Estrayendo testu...",
+                    ["TextExtracted"] = "Testu estrayíu correchu",
+                    ["NoImageInClipboard"] = "Nun hai imaxe nel porta-retayos",
+                    ["NoTextFound"] = "Nun s'atopó testu na imaxe",
+                    ["InsertText"] = "Inxertar Testu",
+                    ["Characters"] = "carauteres",
+
+                    // 🔗 Enllaces
+                    ["DocumentLinks"] = "Enllaces del Documentu",
+                    ["OutgoingLinks"] = "Enllaces Salientes",
+                    ["Backlinks"] = "Retroenlaces",
+                    ["RelatedDocuments"] = "Documentos Rellacionaos",
+                    ["BrokenLinks"] = "Enllaces Rotos",
+                    ["WikiLinkHelp"] = "Usa [[Nome Documentu]] pa criar enllaces ente documentos",
+                    ["NoLinksFound"] = "Nun s'atoparon enllaces",
+                    ["NoBacklinksFound"] = "Nun s'atoparon retroenlaces",
+                    ["NoRelatedFound"] = "Nun s'atoparon documentos rellacionaos",
+                    ["DocumentNotFound"] = "Documentu nun atopáu",
+                    ["NoBrokenLinks"] = "Nun hai enllaces rotos",
+
+                    // 📎 Axuntos
+                    ["Attachments"] = "Ficheros Axuntos",
+                    ["AddFile"] = "Amestar Ficheru",
+                    ["PasteImage"] = "Apegar Imaxe",
+                    ["SelectAttachment"] = "Escueyi un axuntu pa previsualizar",
+                    ["NoAttachments"] = "Entá nun hai axuntos",
+                    ["OpenFile"] = "Abrir Ficheru",
+
+                    // 🔧 Tooltips
+                    ["TooltipNewDocument"] = "Documentu Nuevu",
+                    ["TooltipSave"] = "Guardar",
+                    ["TooltipExportHTML"] = "Esportar a HTML",
+                    ["TooltipPrint"] = "Imprentar Documentu",
+                    ["TooltipPython"] = "Execución de Códigu Python",
+                    ["TooltipGitHubUpload"] = "Xubida Rápida a GitHub",
+                    ["TooltipGitHubSettings"] = "Configuración de GitHub",
+                    ["TooltipLanguage"] = "Idioma / Language",
+                    ["TooltipAIAssistant"] = "Asistente IA",
+                    ["TooltipSendEmail"] = "Unviar per Correau",
+                    ["TooltipVersionHistory"] = "Historial de Versiones",
+                    ["TooltipEncryption"] = "Cifráu",
+                    ["TooltipCloudSync"] = "Sincronización na Ñube",
+                    ["TooltipOCR"] = "OCR - Reconocimientu de Testu",
+                    ["TooltipDocumentLinks"] = "Enllaces del Documentu",
+                    ["TooltipAttachments"] = "Ficheros Axuntos"
                 }
             };
         }

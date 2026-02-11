@@ -74,6 +74,7 @@
 - **Navegación jerárquica** con niveles de encabezados indentados
 - **Funcionalidad de clic para navegar** para navegación rápida del documento
 - **Alternar barra lateral** para escritura enfocada
+- **Enlaces entre documentos**
 
 ### **Interfaz de Usuario**
 - **Diseño Fluent moderno** con WinUI 3
@@ -172,11 +173,33 @@ Jot/
 │   ├── MarkdownPreview.xaml   # Visor de Markdown renderizado
 │   └── QuizControl.xaml       # Componente de quiz
 ├── Converters/            # Convertidores de valor XAML
+├── Dialogs/               # Diálogos personalizados
+│   ├── ChatbotDialog.cs         # Diálogo del chatbot
+│   ├── SendEmailDialog.cs       # Diálogo de envío de email
+│   ├── VersionHistoryDialog.cs  # Diálogo de historial de versiones
+│   ├── EncryptionDialog.cs      # Diálogo de cifrado/descifrado
+│   ├── CloudSyncDialog.cs       # Diálogo de sincronización en nube
+│   ├── OcrDialog.cs             # Diálogo de OCR
+│   ├── DocumentLinksDialog.cs   # Diálogo de enlaces entre documentos
+│   └── AttachmentsDialog.cs     # Diálogo de gestión de adjuntos
 ├── Models/                # Modelos de datos
 │   └── Document.cs           # Entidad documento
 ├── Services/              # Servicios de lógica de negocio
-│   ├── DocumentService.cs    # Operaciones CRUD de documento
-│   └── ThemeService.cs       # Gestión de temas
+│   ├── DocumentService.cs       # Operaciones CRUD de documento
+│   ├── ThemeService.cs          # Gestión de temas
+│   ├── HtmlExportService.cs     # Exportación a HTML
+│   ├── PythonExecutionService.cs # Ejecución de código Python
+│   ├── GitHubUploadService.cs   # Subida a GitHub
+│   ├── EmailService.cs          # Envío de emails
+│   ├── ChatbotService.cs        # Chatbot RAG
+│   ├── DrawingService.cs        # Dibujo sobre documentos
+│   ├── PrintService.cs          # Impresión de documentos
+│   ├── VersionHistoryService.cs # Historial de versiones
+│   ├── EncryptionService.cs     # Cifrado AES-256
+│   ├── CloudSyncService.cs      # Sincronización con OneDrive/Google Drive/Dropbox
+│   ├── OcrService.cs            # Reconocimiento óptico de caracteres
+│   ├── DocumentLinksService.cs  # Enlaces entre documentos Wiki-style
+│   └── AttachmentService.cs     # Gestión de archivos adjuntos
 ├── ViewModels/            # View models MVVM
 │   ├── MainViewModel.cs      # Lógica de ventana principal
 │   └── SettingsViewModel.cs  # Gestión de configuraciones
